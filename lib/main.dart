@@ -79,21 +79,21 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
                   child: Container(
                     padding: EdgeInsets.only(top: top, left: left),
                     child: ScaleTransition(
-                      scale: Tween(begin: 2.0, end: 0.5).animate(dartAnimationController),
+                      scale: Tween(begin: 5.0, end: 1.5).animate(dartAnimationController),
                       child: Dart(dartAnimationController: dartAnimationController),
                     ),
                   ),
                   feedback: Container(
                     padding: EdgeInsets.only(top: top, left: left),
                     child: ScaleTransition(
-                      scale: Tween(begin: 2.0, end: 0.5).animate(dartAnimationController),
+                      scale: Tween(begin: 5.0, end: 1.5).animate(dartAnimationController),
                       child: Dart(dartAnimationController: dartAnimationController),
                     ),
                   ),
                   childWhenDragging: Container(
                     padding: EdgeInsets.only(top: top, left: left),
                     child: ScaleTransition(
-                      scale: Tween(begin: 2.0, end: 0.5).animate(dartAnimationController),
+                      scale: Tween(begin: 5.0, end: 1.5).animate(dartAnimationController),
                       child: Dart(dartAnimationController: dartAnimationController),
                     ),
                   ),
@@ -136,7 +136,7 @@ class _DartState extends State<Dart> {
   @override
   Widget build(BuildContext context) {
     return Image.asset(
-      'dart-test.png',
+      'arrow.png',
       width: 40,
       height: 100,
     );
