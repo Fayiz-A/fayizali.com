@@ -50,7 +50,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
 
   void prepareAnimations() {
     dartAnimationController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 500));
+        AnimationController(vsync: this, duration: Duration(milliseconds: 400));
 
     dartScaleAnimation = CurvedAnimation(
       curve: Curves.linear,
@@ -68,10 +68,7 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
               children: [
                 DragTarget<String>(
                   builder: (context, acceptedCandidates, rejectedCandidates) {
-                    return CustomPaint(
-                      size: Size(400, 400),
-                      painter: DartBoardPainter(),
-                    );
+                    return Image.asset('dart_board.png', width: 700, height: 700,);
                   },
                 ),
                 Draggable<String>(
@@ -136,9 +133,9 @@ class _DartState extends State<Dart> {
   @override
   Widget build(BuildContext context) {
     return Image.asset(
-      'arrow.png',
-      width: 40,
-      height: 100,
+      'dart.png',
+      width: 90,
+      height: 90,
     );
   }
 }
