@@ -18,18 +18,40 @@
 // //
 // // }
 
+import 'package:dynamic_theme/dynamic_theme.dart';
+import 'package:fayizali/providers/lever_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
-void main() {
-  runApp(MaterialApp(home: MyApp()));
-}
+void main() => runApp(MyApp());
 
-class MyApp extends StatefulWidget {
+class MyApp extends StatelessWidget {
   @override
-  _MyAppState createState() => _MyAppState();
+  Widget build(BuildContext context) {
+    return DynamicTheme(
+      defaultBrightness: Brightness.dark,
+      data: (brightness) => ThemeData(
+        primarySwatch: Colors.indigo,
+        brightness: brightness,
+    ),
+      themedWidgetBuilder: (context, theme) => MultiProvider(
+        providers: [ChangeNotifierProvider(create: (_) => LeverProvider())],
+        child: MaterialApp(
+          title: 'Fayiz Ali',
+          theme: theme,
+          home: HomePage(),
+        ),
+      ),
+    );
+  }
+} 
+
+class HomePage extends StatefulWidget {
+  @override
+  _HomePageState createState() => _HomePageState();
 }
 
-class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
@@ -58,18 +80,66 @@ class _MyAppState extends State<MyApp> with SingleTickerProviderStateMixin {
     );
   }
 
+  void _onReleaseLeverDragged(DragUpdateDetails dragUpdateDetails) {
+    double dy = dragUpdateDetails.localPosition.dy;
+    leverProvider.dragPosition = dy;
+
+  }
+
+  var leverProvider;
+
   @override
   Widget build(BuildContext context) {
+
+    leverProvider = Provider.of<LeverProvider>(context);
+
     return Scaffold(
         appBar: AppBar(title: Text('Dart App')),
         body: Row(
           children: [
             Stack(
               children: [
-                DragTarget<String>(
-                  builder: (context, acceptedCandidates, rejectedCandidates) {
-                    return Image.asset('dart_board.png', width: 700, height: 700,);
-                  },
+                Stack(
+                  alignment: Alignment.bottomRight,
+                  children: [
+                    Container(
+                      width: MediaQuery.of(context).size.width,
+                      height: MediaQuery.of(context).size.height,
+                      child: Center(
+                        child: DragTarget<String>(
+                          builder: (context, acceptedCandidates, rejectedCandidates) {
+                            return Image.asset('dart_board.png', width: MediaQuery.of(context).size.width/2, height: MediaQuery.of(context).size.width/2,);
+                          },
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(0.0, 0.0, 40.0, 100.0),
+                      child: Container(
+                        alignment: Alignment.bottomCenter,
+                        height: MediaQuery.of(context).size.height*0.4,//40% of the screen height
+                        decoration: BoxDecoration(
+                          color: Colors.green,
+                          shape: BoxShape.rectangle,
+                          borderRadius: BorderRadius.all(Radius.circular(400))
+                        ),
+                        child: Consumer<LeverProvider>(
+                          child: GestureDetector(
+                              onVerticalDragUpdate: _onReleaseLeverDragged,
+                              child: CircleAvatar(backgroundColor: Colors.white,)
+                          ),
+                          builder: (context, provider, child) {
+                            double leverPosition = provider.dragPosition;
+
+                            return Padding(
+                              padding: EdgeInsets.fromLTRB(8.0, 8.0, 8.0, leverPosition ),
+                              child: child,
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
                 Draggable<String>(
                   data: 'dart',
@@ -132,10 +202,12 @@ class Dart extends StatefulWidget {
 class _DartState extends State<Dart> {
   @override
   Widget build(BuildContext context) {
+    double screenWidth =  MediaQuery.of(context).size.width;
+
     return Image.asset(
       'dart.png',
-      width: 90,
-      height: 90,
+      width: screenWidth*0.05,
+      height: screenWidth*0.05,
     );
   }
 }
