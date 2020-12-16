@@ -34,10 +34,12 @@ class MyApp extends StatelessWidget {
       data: (brightness) => ThemeData(
         primarySwatch: Colors.indigo,
         brightness: brightness,
-    ),
+      ),
       themedWidgetBuilder: (context, theme) => MultiProvider(
-        providers: [ChangeNotifierProvider(create: (_) => LeverProvider()),
-        ChangeNotifierProvider(create: (_) => DartProvider())],
+        providers: [
+          ChangeNotifierProvider(create: (_) => LeverProvider()),
+          ChangeNotifierProvider(create: (_) => DartProvider())
+        ],
         child: MaterialApp(
           title: 'Fayiz Ali',
           theme: theme,
@@ -46,19 +48,19 @@ class MyApp extends StatelessWidget {
       ),
     );
   }
-} 
+}
 
 class HomePage extends StatefulWidget {
   @override
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
+class _HomePageState extends State<HomePage>
+    with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
     prepareAnimations();
-
   }
 
   void dispose() {
@@ -83,7 +85,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 
   void _onDartTapped(TapDownDetails tapDownDetails) {
-
     dartProvider.dartLocalPosition = tapDownDetails.localPosition;
   }
 
@@ -94,14 +95,12 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   void _onReleaseLeverDragged(DragUpdateDetails dragUpdateDetails) {
     double dy = dragUpdateDetails.localPosition.dy;
     leverProvider.dragPosition = dy;
-
   }
 
   var leverProvider, dartProvider;
 
   @override
   Widget build(BuildContext context) {
-
     dartProvider = Provider.of<DartProvider>(context);
     leverProvider = Provider.of<LeverProvider>(context);
 
@@ -119,8 +118,13 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       height: MediaQuery.of(context).size.height,
                       child: Center(
                         child: DragTarget<String>(
-                          builder: (context, acceptedCandidates, rejectedCandidates) {
-                            return Image.asset('dart_board.png', width: MediaQuery.of(context).size.width/2, height: MediaQuery.of(context).size.width/2,);
+                          builder: (context, acceptedCandidates,
+                              rejectedCandidates) {
+                            return Image.asset(
+                              'dart_board.png',
+                              width: MediaQuery.of(context).size.width / 2,
+                              height: MediaQuery.of(context).size.width / 2,
+                            );
                           },
                         ),
                       ),
@@ -129,22 +133,25 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                       padding: EdgeInsets.fromLTRB(0.0, 0.0, 40.0, 100.0),
                       child: Container(
                         alignment: Alignment.bottomCenter,
-                        height: MediaQuery.of(context).size.height*0.4,//40% of the screen height
+                        height: MediaQuery.of(context).size.height *
+                            0.4, //40% of the screen height
                         decoration: BoxDecoration(
-                          color: Colors.green,
-                          shape: BoxShape.rectangle,
-                          borderRadius: BorderRadius.all(Radius.circular(400))
-                        ),
+                            color: Colors.green,
+                            shape: BoxShape.rectangle,
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(400))),
                         child: Consumer<LeverProvider>(
                           child: GestureDetector(
                               onVerticalDragUpdate: _onReleaseLeverDragged,
-                              child: CircleAvatar(backgroundColor: Colors.white,)
-                          ),
+                              child: CircleAvatar(
+                                backgroundColor: Colors.white,
+                              )),
                           builder: (context, provider, child) {
                             double leverPosition = provider.dragPosition;
 
                             return Padding(
-                              padding: EdgeInsets.fromLTRB(8.0, 8.0, 8.0, leverPosition ),
+                              padding: EdgeInsets.fromLTRB(
+                                  8.0, 8.0, 8.0, leverPosition),
                               child: child,
                             );
                           },
@@ -154,33 +161,26 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   ],
                 ),
                 Consumer<DartProvider>(
+                  child: ScaleTransition(
+                    scale: Tween(begin: 5.0, end: 1.5)
+                        .animate(dartAnimationController),
+                    child: GestureDetector(
+                        onTapDown: _onDartTapped,
+                        child: Dart(
+                            dartAnimationController: dartAnimationController)),
+                  ),
                   builder: (context, provider, child) {
-
                     Offset offset = provider.dragPosition;
 
                     return GestureDetector(
                       onPanUpdate: _onDartDragged,
                       child: Container(
-                        padding: EdgeInsets.only(top: offset.dy, left: offset.dx),
-                        child: ScaleTransition(
-                          scale: Tween(begin: 5.0, end: 1.5).animate(dartAnimationController),
-                          child: GestureDetector(
-                              onTapDown: _onDartTapped,
-                              child: Dart(dartAnimationController: dartAnimationController)
-                          ),
-                        ),
+                        padding:
+                            EdgeInsets.only(top: offset.dy, left: offset.dx),
+                        child: child,
                       ),
                     );
                   },
-                  child: GestureDetector(
-                    child: Container(
-                      padding: EdgeInsets.only(top: top, left: left),
-                      child: ScaleTransition(
-                        scale: Tween(begin: 5.0, end: 1.5).animate(dartAnimationController),
-                        child: Dart(dartAnimationController: dartAnimationController),
-                      ),
-                    ),
-                  ),
                 ),
                 ElevatedButton(
                   child: Text('Release'),
@@ -207,12 +207,12 @@ class Dart extends StatefulWidget {
 class _DartState extends State<Dart> {
   @override
   Widget build(BuildContext context) {
-    double screenWidth =  MediaQuery.of(context).size.width;
+    double screenWidth = MediaQuery.of(context).size.width;
 
     return Image.asset(
       'dart.png',
-      width: screenWidth*0.05,
-      height: screenWidth*0.05,
+      width: screenWidth * 0.05,
+      height: screenWidth * 0.05,
     );
   }
 }
