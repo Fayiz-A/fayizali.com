@@ -76,7 +76,7 @@ class _HomePageState extends State<HomePage>
 
   void prepareAnimations() {
     dartAnimationController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 400));
+        AnimationController(vsync: this, duration: Duration(milliseconds: 400), value: 1.6);
 
     dartScaleAnimation = CurvedAnimation(
       curve: Curves.linear,
@@ -95,6 +95,8 @@ class _HomePageState extends State<HomePage>
   void _onReleaseLeverDragged(DragUpdateDetails dragUpdateDetails) {
     double dy = dragUpdateDetails.localPosition.dy;
     leverProvider.dragPosition = dy;
+
+    dartAnimationController.value = (dy/112);
   }
 
   var leverProvider, dartProvider;
@@ -182,6 +184,7 @@ class _HomePageState extends State<HomePage>
                     );
                   },
                 ),
+                //TODO: Remove the widget below as it is only for ease of testing
                 ElevatedButton(
                   child: Text('Release'),
                   onPressed: () {
