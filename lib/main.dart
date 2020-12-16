@@ -19,6 +19,7 @@
 // // }
 
 import 'package:dynamic_theme/dynamic_theme.dart';
+import 'package:fayizali/providers/dart_provider.dart';
 import 'package:fayizali/providers/lever_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -35,7 +36,8 @@ class MyApp extends StatelessWidget {
         brightness: brightness,
     ),
       themedWidgetBuilder: (context, theme) => MultiProvider(
-        providers: [ChangeNotifierProvider(create: (_) => LeverProvider())],
+        providers: [ChangeNotifierProvider(create: (_) => LeverProvider()),
+        ChangeNotifierProvider(create: (_) => DartProvider())],
         child: MaterialApp(
           title: 'Fayiz Ali',
           theme: theme,
@@ -80,17 +82,27 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
     );
   }
 
+  void _onDartTapped(TapDownDetails tapDownDetails) {
+
+    dartProvider.dartLocalPosition = tapDownDetails.localPosition;
+  }
+
+  void _onDartDragged(DragUpdateDetails details) {
+    dartProvider.dragPosition = details.localPosition;
+  }
+
   void _onReleaseLeverDragged(DragUpdateDetails dragUpdateDetails) {
     double dy = dragUpdateDetails.localPosition.dy;
     leverProvider.dragPosition = dy;
 
   }
 
-  var leverProvider;
+  var leverProvider, dartProvider;
 
   @override
   Widget build(BuildContext context) {
 
+    dartProvider = Provider.of<DartProvider>(context);
     leverProvider = Provider.of<LeverProvider>(context);
 
     return Scaffold(
@@ -141,41 +153,34 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     ),
                   ],
                 ),
-                Draggable<String>(
-                  data: 'dart',
-                  child: Container(
-                    padding: EdgeInsets.only(top: top, left: left),
-                    child: ScaleTransition(
-                      scale: Tween(begin: 5.0, end: 1.5).animate(dartAnimationController),
-                      child: Dart(dartAnimationController: dartAnimationController),
-                    ),
-                  ),
-                  feedback: Container(
-                    padding: EdgeInsets.only(top: top, left: left),
-                    child: ScaleTransition(
-                      scale: Tween(begin: 5.0, end: 1.5).animate(dartAnimationController),
-                      child: Dart(dartAnimationController: dartAnimationController),
-                    ),
-                  ),
-                  childWhenDragging: Container(
-                    padding: EdgeInsets.only(top: top, left: left),
-                    child: ScaleTransition(
-                      scale: Tween(begin: 5.0, end: 1.5).animate(dartAnimationController),
-                      child: Dart(dartAnimationController: dartAnimationController),
-                    ),
-                  ),
-                  onDraggableCanceled: (velocity, offset) {},
-                  onDragEnd: (details) {
-                    setState(() {
-                      double dx = details.offset.dx;
-                      double dy = details.offset.dy;
+                Consumer<DartProvider>(
+                  builder: (context, provider, child) {
 
-                      left = dx + left;
-                      top = dy + top;
-                      print('left: $left');
-                      print('top: $top');
-                    });
+                    Offset offset = provider.dragPosition;
+
+                    return GestureDetector(
+                      onPanUpdate: _onDartDragged,
+                      child: Container(
+                        padding: EdgeInsets.only(top: offset.dy, left: offset.dx),
+                        child: ScaleTransition(
+                          scale: Tween(begin: 5.0, end: 1.5).animate(dartAnimationController),
+                          child: GestureDetector(
+                              onTapDown: _onDartTapped,
+                              child: Dart(dartAnimationController: dartAnimationController)
+                          ),
+                        ),
+                      ),
+                    );
                   },
+                  child: GestureDetector(
+                    child: Container(
+                      padding: EdgeInsets.only(top: top, left: left),
+                      child: ScaleTransition(
+                        scale: Tween(begin: 5.0, end: 1.5).animate(dartAnimationController),
+                        child: Dart(dartAnimationController: dartAnimationController),
+                      ),
+                    ),
+                  ),
                 ),
                 ElevatedButton(
                   child: Text('Release'),
