@@ -20,4 +20,15 @@ class DartProvider with ChangeNotifier {
   }
 
   set dartLocalPosition(dartLocalPosition) => _dartLocalPosition = dartLocalPosition;
+
+  double initialScaleValue = 5.0;
+
+  double _scaleValue = 5.0;
+
+  get scaleValue => _scaleValue;
+
+  set scaleValue(double scaleValue) {
+    _scaleValue = initialScaleValue + (scaleValue * initialScaleValue);
+    notifyListeners();
+  }
 }

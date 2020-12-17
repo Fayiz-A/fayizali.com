@@ -76,12 +76,7 @@ class _HomePageState extends State<HomePage>
 
   void prepareAnimations() {
     dartAnimationController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 400), value: 1.6);
-
-    dartScaleAnimation = CurvedAnimation(
-      curve: Curves.linear,
-      parent: dartAnimationController,
-    );
+        AnimationController(vsync: this, duration: Duration(milliseconds: 400));
   }
 
   void _onDartTapped(TapDownDetails tapDownDetails) {
@@ -96,10 +91,21 @@ class _HomePageState extends State<HomePage>
     double dy = dragUpdateDetails.localPosition.dy;
     leverProvider.dragPosition = dy;
 
-    dartAnimationController.value = (dy/112);
+    final keyContext = leverKey.currentContext;
+
+    if(keyContext != null) {
+      final box = keyContext.findRenderObject() as RenderBox;
+      final height = box.size.height;
+
+      // dartAnimationController.value = (leverProvider.dragPosition/height);
+
+      dartProvider.scaleValue = leverProvider.dragPosition/height;
+    }
   }
 
   var leverProvider, dartProvider;
+
+  GlobalKey leverKey = GlobalKey();
 
   @override
   Widget build(BuildContext context) {
@@ -134,6 +140,7 @@ class _HomePageState extends State<HomePage>
                     Padding(
                       padding: EdgeInsets.fromLTRB(0.0, 0.0, 40.0, 100.0),
                       child: Container(
+                        key: leverKey,
                         alignment: Alignment.bottomCenter,
                         height: MediaQuery.of(context).size.height *
                             0.4, //40% of the screen height
@@ -163,33 +170,37 @@ class _HomePageState extends State<HomePage>
                   ],
                 ),
                 Consumer<DartProvider>(
-                  child: ScaleTransition(
-                    scale: Tween(begin: 5.0, end: 1.5)
-                        .animate(dartAnimationController),
-                    child: GestureDetector(
-                        onTapDown: _onDartTapped,
-                        child: Dart(
-                            dartAnimationController: dartAnimationController)),
-                  ),
+                  child: GestureDetector(
+                      onTapDown: _onDartTapped,
+                      child: Dart(
+                          dartAnimationController: dartAnimationController)),
                   builder: (context, provider, child) {
                     Offset offset = provider.dragPosition;
+                    double scaleValue = provider.scaleValue;
 
                     return GestureDetector(
                       onPanUpdate: _onDartDragged,
                       child: Container(
                         padding:
                             EdgeInsets.only(top: offset.dy, left: offset.dx),
-                        child: child,
+                        child: ScaleTransition(
+                          scale: Tween(begin: scaleValue, end: 1.5)
+                              .animate(dartAnimationController),
+                          child: child,
+                        ),
                       ),
                     );
                   },
                 ),
                 //TODO: Remove the widget below as it is only for ease of testing
-                ElevatedButton(
-                  child: Text('Release'),
-                  onPressed: () {
-                    dartAnimationController.forward();
-                  },
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: ElevatedButton(
+                    child: Text('Release'),
+                    onPressed: () {
+                      dartAnimationController.forward();
+                    },
+                  ),
                 )
               ],
             ),
@@ -214,8 +225,8 @@ class _DartState extends State<Dart> {
 
     return Image.asset(
       'dart.png',
-      width: screenWidth * 0.05,
-      height: screenWidth * 0.05,
+      width: screenWidth * 0.02,
+      height: screenWidth * 0.02,
     );
   }
 }
