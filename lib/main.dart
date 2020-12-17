@@ -56,7 +56,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
@@ -72,20 +72,23 @@ class _HomePageState extends State<HomePage>
   double left = 0.0;
 
   AnimationController dartAnimationController;
-  Animation<double> dartScaleAnimation;
+
+  AnimationController leverAnimationController;
 
   void prepareAnimations() {
     dartAnimationController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 400));
-  }
-
-  void _onDartTapped(TapDownDetails tapDownDetails) {
-    dartProvider.dartLocalPosition = tapDownDetails.localPosition;
+    leverAnimationController = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: dartAnimationController.duration.inMilliseconds)
+    );
   }
 
   void _onDartDragged(DragUpdateDetails details) {
     dartProvider.dragPosition = details.localPosition;
   }
+
+  double leverContainerHeight;
 
   void _onReleaseLeverDragged(DragUpdateDetails dragUpdateDetails) {
     double dy = dragUpdateDetails.localPosition.dy;
@@ -95,11 +98,9 @@ class _HomePageState extends State<HomePage>
 
     if(keyContext != null) {
       final box = keyContext.findRenderObject() as RenderBox;
-      final height = box.size.height;
+      leverContainerHeight = box.size.height;
 
-      // dartAnimationController.value = (leverProvider.dragPosition/height);
-
-      dartProvider.scaleValue = leverProvider.dragPosition/height;
+      dartProvider.scaleValue = leverProvider.dragPosition/leverContainerHeight;
     }
   }
 
@@ -142,8 +143,8 @@ class _HomePageState extends State<HomePage>
                       child: Container(
                         key: leverKey,
                         alignment: Alignment.bottomCenter,
-                        height: MediaQuery.of(context).size.height *
-                            0.4, //40% of the screen height
+                        height: MediaQuery.of(context).size.height * 0.4,
+                        //40% of the screen height
                         decoration: BoxDecoration(
                             color: Colors.green,
                             shape: BoxShape.rectangle,
@@ -152,15 +153,32 @@ class _HomePageState extends State<HomePage>
                         child: Consumer<LeverProvider>(
                           child: GestureDetector(
                               onVerticalDragUpdate: _onReleaseLeverDragged,
+                              onVerticalDragEnd: (DragEndDetails details) {
+                                dartAnimationController.forward();
+                                leverAnimationController.reverse(from: 1.0);
+                              },
                               child: CircleAvatar(
                                 backgroundColor: Colors.white,
                               )),
                           builder: (context, provider, child) {
                             double leverPosition = provider.dragPosition;
 
-                            return Padding(
-                              padding: EdgeInsets.fromLTRB(
-                                  8.0, 8.0, 8.0, leverPosition),
+                            return AnimatedBuilder(
+                              builder: (context, child) {
+                                bool animationCompleted = false;
+                                double leverContainerVerticalPadding = 16;
+                                print(leverAnimationController.value != 0);
+                                if(leverAnimationController.value != 0 && leverContainerHeight != null) {
+                                  animationCompleted = true;
+                                }
+
+                                return Padding(
+                                  padding: EdgeInsets.fromLTRB(
+                                      8.0, 8.0, 8.0, animationCompleted ? (leverContainerHeight-leverContainerVerticalPadding)*leverAnimationController.value:leverPosition),
+                                  child: child,
+                                );
+                              },
+                              animation: leverAnimationController,
                               child: child,
                             );
                           },
@@ -170,10 +188,7 @@ class _HomePageState extends State<HomePage>
                   ],
                 ),
                 Consumer<DartProvider>(
-                  child: GestureDetector(
-                      onTapDown: _onDartTapped,
-                      child: Dart(
-                          dartAnimationController: dartAnimationController)),
+                  child: Dart(),
                   builder: (context, provider, child) {
                     Offset offset = provider.dragPosition;
                     double scaleValue = provider.scaleValue;
@@ -210,9 +225,6 @@ class _HomePageState extends State<HomePage>
 }
 
 class Dart extends StatefulWidget {
-  final AnimationController dartAnimationController;
-
-  Dart({@required this.dartAnimationController});
 
   @override
   _DartState createState() => _DartState();
