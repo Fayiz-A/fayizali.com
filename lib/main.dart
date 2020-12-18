@@ -55,8 +55,7 @@ class HomePage extends StatefulWidget {
   _HomePageState createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage>
-    with TickerProviderStateMixin {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
@@ -75,12 +74,22 @@ class _HomePageState extends State<HomePage>
 
   AnimationController leverAnimationController;
 
+  AnimationController dartBoardAnimationController;
+  Animation<double> dartBoardSlideAnimation;
+
   void prepareAnimations() {
+    dartBoardAnimationController = AnimationController(
+        vsync: this, duration: Duration(milliseconds: 2000))..forward();
+
+    dartBoardSlideAnimation = Tween(begin: -1.0, end: 1.0).animate(CurvedAnimation(
+        parent: dartBoardAnimationController, curve: Curves.bounceOut));
+
     dartAnimationController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 400));
     leverAnimationController = AnimationController(
-      vsync: this,
-      duration: Duration(milliseconds: dartAnimationController.duration.inMilliseconds)
+        vsync: this,
+        duration: Duration(
+            milliseconds: dartAnimationController.duration.inMilliseconds)
     );
   }
 
@@ -96,11 +105,12 @@ class _HomePageState extends State<HomePage>
 
     final keyContext = leverKey.currentContext;
 
-    if(keyContext != null) {
+    if (keyContext != null) {
       final box = keyContext.findRenderObject() as RenderBox;
       leverContainerHeight = box.size.height;
 
-      dartProvider.scaleValue = leverProvider.dragPosition/leverContainerHeight;
+      dartProvider.scaleValue =
+          leverProvider.dragPosition / leverContainerHeight;
     }
   }
 
@@ -114,7 +124,6 @@ class _HomePageState extends State<HomePage>
     leverProvider = Provider.of<LeverProvider>(context);
 
     return Scaffold(
-        appBar: AppBar(title: Text('Dart App')),
         body: Row(
           children: [
             Stack(
@@ -125,16 +134,18 @@ class _HomePageState extends State<HomePage>
                     Container(
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height,
-                      child: Center(
-                        child: DragTarget<String>(
-                          builder: (context, acceptedCandidates,
-                              rejectedCandidates) {
-                            return Image.asset(
-                              'dart_board.png',
-                              width: MediaQuery.of(context).size.width / 2,
-                              height: MediaQuery.of(context).size.width / 2,
-                            );
-                          },
+                      child: AnimatedBuilder(
+                        animation: dartBoardSlideAnimation,
+                        builder: (context, child) {
+                          return Transform.translate(
+                            offset: Offset(0, dartBoardSlideAnimation.value * ((MediaQuery.of(context).size.height / 4))),
+                            child: child,
+                          );
+                        },
+                        child: Image.asset(
+                          'dart_board.png',
+                          width: MediaQuery.of(context).size.width / 2,
+                          height: MediaQuery.of(context).size.width / 2,
                         ),
                       ),
                     ),
@@ -149,7 +160,7 @@ class _HomePageState extends State<HomePage>
                             color: Colors.green,
                             shape: BoxShape.rectangle,
                             borderRadius:
-                                BorderRadius.all(Radius.circular(400))),
+                            BorderRadius.all(Radius.circular(400))),
                         child: Consumer<LeverProvider>(
                           child: GestureDetector(
                               onVerticalDragUpdate: _onReleaseLeverDragged,
@@ -168,13 +179,21 @@ class _HomePageState extends State<HomePage>
                                 bool animationCompleted = false;
                                 double leverContainerVerticalPadding = 16;
                                 print(leverAnimationController.value != 0);
-                                if(leverAnimationController.value != 0 && leverContainerHeight != null) {
+                                if (leverAnimationController.value != 0 &&
+                                    leverContainerHeight != null) {
                                   animationCompleted = true;
                                 }
 
                                 return Padding(
                                   padding: EdgeInsets.fromLTRB(
-                                      8.0, 8.0, 8.0, animationCompleted ? (leverContainerHeight-leverContainerVerticalPadding)*leverAnimationController.value:leverPosition),
+                                      8.0,
+                                      8.0,
+                                      8.0,
+                                      animationCompleted
+                                          ? (leverContainerHeight -
+                                          leverContainerVerticalPadding) *
+                                          leverAnimationController.value
+                                          : leverPosition),
                                   child: child,
                                 );
                               },
@@ -197,7 +216,7 @@ class _HomePageState extends State<HomePage>
                       onPanUpdate: _onDartDragged,
                       child: Container(
                         padding:
-                            EdgeInsets.only(top: offset.dy, left: offset.dx),
+                        EdgeInsets.only(top: offset.dy, left: offset.dx),
                         child: ScaleTransition(
                           scale: Tween(begin: scaleValue, end: 1.5)
                               .animate(dartAnimationController),
@@ -225,7 +244,6 @@ class _HomePageState extends State<HomePage>
 }
 
 class Dart extends StatefulWidget {
-
   @override
   _DartState createState() => _DartState();
 }
