@@ -15,4 +15,14 @@ class LeverProvider with ChangeNotifier {
     notifyListeners();
 
   }
+
+  bool _leverDragged = false;
+
+  get leverDragged => _leverDragged;
+
+  set leverDragged(bool leverDragged) {
+    _leverDragged = leverDragged;
+    _dragPosition = 8.0;
+    notifyListeners();
+  }
 }

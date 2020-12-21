@@ -81,7 +81,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     dartBoardAnimationController = AnimationController(
         vsync: this, duration: Duration(milliseconds: 2000))..forward();
 
-    dartBoardSlideAnimation = Tween(begin: -1.0, end: 1.0).animate(CurvedAnimation(
+    dartBoardSlideAnimation = Tween(begin: -5.0, end: 0.0).animate(CurvedAnimation(
         parent: dartBoardAnimationController, curve: Curves.bounceOut));
 
     dartAnimationController =
@@ -165,39 +165,25 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                           child: GestureDetector(
                               onVerticalDragUpdate: _onReleaseLeverDragged,
                               onVerticalDragEnd: (DragEndDetails details) {
+                                leverProvider.leverDragged = true;
+
                                 dartAnimationController.forward();
-                                leverAnimationController.reverse(from: 1.0);
+                                // leverAnimationController.reverse(from: 1.0);
                               },
                               child: CircleAvatar(
                                 backgroundColor: Colors.white,
                               )),
                           builder: (context, provider, child) {
                             double leverPosition = provider.dragPosition;
+                            bool leverDragged = provider.leverDragged;
 
-                            return AnimatedBuilder(
-                              builder: (context, child) {
-                                bool animationCompleted = false;
-                                double leverContainerVerticalPadding = 16;
-                                print(leverAnimationController.value != 0);
-                                if (leverAnimationController.value != 0 &&
-                                    leverContainerHeight != null) {
-                                  animationCompleted = true;
-                                }
-
-                                return Padding(
-                                  padding: EdgeInsets.fromLTRB(
-                                      8.0,
-                                      8.0,
-                                      8.0,
-                                      animationCompleted
-                                          ? (leverContainerHeight -
-                                          leverContainerVerticalPadding) *
-                                          leverAnimationController.value
-                                          : leverPosition),
-                                  child: child,
-                                );
-                              },
-                              animation: leverAnimationController,
+                            return AnimatedPadding(
+                              duration: leverDragged == true ? dartAnimationController.duration:Duration.zero,
+                              padding: EdgeInsets.fromLTRB(
+                                  8.0,
+                                  8.0,
+                                  8.0,
+                                  leverPosition),
                               child: child,
                             );
                           },
