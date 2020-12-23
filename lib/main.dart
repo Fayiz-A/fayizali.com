@@ -75,15 +75,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   AnimationController dartBoardAnimationController;
   Animation<double> dartBoardSlideAnimation;
 
+  Animation<Offset> leverDartSlideAnimation;
+
   void prepareAnimations() {
     dartBoardAnimationController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 2000))
+        AnimationController(vsync: this, duration: Duration(milliseconds: 3000))
           ..forward();
 
     dartBoardSlideAnimation = Tween(begin: -5.0, end: 0.0).animate(
         CurvedAnimation(
-            parent: dartBoardAnimationController,
-            curve: Interval(0.0, 1.0, curve: Curves.bounceOut)));
+            parent: dartBoardAnimationController, curve: Interval(0.0, 0.5, curve: Curves.bounceOut)));
+
+    leverDartSlideAnimation =
+        Tween<Offset>(begin: Offset(2.0, 0.0), end: Offset(0.0, 0.0)).animate(
+            CurvedAnimation(
+                parent: dartBoardAnimationController, curve: Interval(0.3, 0.7, curve: Curves.elasticOut)));
 
     dartAnimationController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 400));
@@ -149,41 +155,45 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   ),
                 ),
                 Padding(
-                  padding: EdgeInsets.fromLTRB(0.0, 0.0, 40.0, 100.0),
+                  padding: const EdgeInsets.fromLTRB(0.0, 0.0, 40, 100),
                   child: Container(
-                    key: leverKey,
-                    alignment: Alignment.bottomCenter,
                     height: MediaQuery.of(context).size.height * 0.4,
-                    //40% of the screen height
-                    decoration: BoxDecoration(
-                        color: Colors.green,
-                        shape: BoxShape.rectangle,
-                        borderRadius: BorderRadius.all(Radius.circular(400))),
-                    child: Consumer<LeverProvider>(
-                      child: GestureDetector(
-                          onVerticalDragUpdate: _onReleaseLeverDragged,
-                          onVerticalDragEnd: (DragEndDetails details) {
-                            leverProvider.leverDragged = true;
+                    child: SlideTransition(
+                      position: leverDartSlideAnimation,
+                      child: Container(
+                        key: leverKey,
+                        alignment: Alignment.bottomCenter,
+                        decoration: BoxDecoration(
+                            color: Colors.green,
+                            shape: BoxShape.rectangle,
+                            borderRadius: BorderRadius.all(Radius.circular(400))),
+                        child: Consumer<LeverProvider>(
+                          child: GestureDetector(
+                              onVerticalDragUpdate: _onReleaseLeverDragged,
+                              onVerticalDragEnd: (DragEndDetails details) {
+                                leverProvider.leverDragged = true;
 
-                            dartAnimationController.forward();
-                            // leverAnimationController.reverse(from: 1.0);
+                                dartAnimationController.forward();
+                                // leverAnimationController.reverse(from: 1.0);
+                              },
+                              child: CircleAvatar(
+                                backgroundColor: Colors.white,
+                              )),
+                          builder: (context, provider, child) {
+                            double leverPosition = provider.dragPosition;
+                            bool leverDragged = provider.leverDragged;
+
+                            return AnimatedPadding(
+                              duration: leverDragged == true
+                                  ? dartAnimationController.duration
+                                  : Duration.zero,
+                              padding: EdgeInsets.fromLTRB(
+                                  8.0, 8.0, 8.0, leverPosition),
+                              child: child,
+                            );
                           },
-                          child: CircleAvatar(
-                            backgroundColor: Colors.white,
-                          )),
-                      builder: (context, provider, child) {
-                        double leverPosition = provider.dragPosition;
-                        bool leverDragged = provider.leverDragged;
-
-                        return AnimatedPadding(
-                          duration: leverDragged == true
-                              ? dartAnimationController.duration
-                              : Duration.zero,
-                          padding:
-                              EdgeInsets.fromLTRB(8.0, 8.0, 8.0, leverPosition),
-                          child: child,
-                        );
-                      },
+                        ),
+                      ),
                     ),
                   ),
                 ),
