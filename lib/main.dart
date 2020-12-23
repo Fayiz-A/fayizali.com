@@ -87,9 +87,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             parent: dartBoardAnimationController, curve: Interval(0.0, 0.5, curve: Curves.bounceOut)));
 
     leverDartSlideAnimation =
-        Tween<Offset>(begin: Offset(2.0, 0.0), end: Offset(0.0, 0.0)).animate(
+        Tween<Offset>(begin: Offset(0.0, -5.0), end: Offset(0.0, 0.0)).animate(
             CurvedAnimation(
-                parent: dartBoardAnimationController, curve: Interval(0.3, 0.7, curve: Curves.elasticOut)));
+                parent: dartBoardAnimationController, curve: Interval(0.4, 0.8, curve: Curves.elasticOut)));
 
     dartAnimationController =
         AnimationController(vsync: this, duration: Duration(milliseconds: 400));
@@ -136,21 +136,22 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 Container(
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height,
-                  child: AnimatedBuilder(
-                    animation: dartBoardSlideAnimation,
-                    builder: (context, child) {
-                      return Transform.translate(
-                        offset: Offset(
-                            0,
-                            dartBoardSlideAnimation.value *
-                                ((MediaQuery.of(context).size.height / 4))),
-                        child: child,
-                      );
-                    },
-                    child: Image.asset(
-                      'dart_board.png',
-                      width: MediaQuery.of(context).size.width / 2,
-                      height: MediaQuery.of(context).size.width / 2,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 10.0),
+                    child: AnimatedBuilder(
+                      animation: dartBoardSlideAnimation,
+                      builder: (context, child) {
+                        return Transform.translate(
+                          offset: Offset(
+                              0,
+                              dartBoardSlideAnimation.value *
+                                  ((MediaQuery.of(context).size.height / 4))),
+                          child: child,
+                        );
+                      },
+                      child: Image.asset(
+                        'dart_board.png',
+                      ),
                     ),
                   ),
                 ),
