@@ -6,14 +6,13 @@ class LeverProvider with ChangeNotifier {
   get dragPosition => _dragPosition;
 
   set dragPosition(double dragPosition) {
-    if(dragPosition.isNegative) {
+    if (dragPosition.isNegative) {
       _dragPosition = dragPosition * -1;
     } else {
       _dragPosition = 8.0;
     }
 
     notifyListeners();
-
   }
 
   bool _leverDragged = false;

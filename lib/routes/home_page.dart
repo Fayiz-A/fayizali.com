@@ -7,7 +7,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-
   PageController pageController = PageController(viewportFraction: 0.8);
 
   double _pageIndex = 0;
@@ -17,9 +16,7 @@ class _HomePageState extends State<HomePage> {
 
     pageController.addListener(() {
       _pageIndex = pageController.page;
-      setState(() {
-
-      });
+      setState(() {});
     });
   }
 
@@ -36,17 +33,20 @@ class _HomePageState extends State<HomePage> {
         title: Text('Fayiz Ali'),
       ),
       body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: PageView(
-            controller: pageController,
-            children: [
-              CustomCard(pageIndex: _pageIndex-1,),
-              CustomCard(pageIndex: _pageIndex,)
-            ],
-          ),
-        )
-      ),
+          child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: PageView(
+          controller: pageController,
+          children: [
+            CustomCard(
+              pageIndex: _pageIndex - 1,
+            ),
+            CustomCard(
+              pageIndex: _pageIndex,
+            )
+          ],
+        ),
+      )),
     );
   }
 }
