@@ -24,7 +24,9 @@ import 'package:dynamic_theme/dynamic_theme.dart';
 import 'package:fayizali/providers/dart_provider.dart';
 import 'package:fayizali/providers/lever_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
+import 'package:rive/rive.dart';
 
 void main() => runApp(MyApp());
 
@@ -59,11 +61,14 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Image wallImage;
+  final riveFileName = 'parchment.riv';
+  Artboard _artboard;
 
   @override
   void initState() {
     super.initState();
     prepareAnimations();
+    _loadRiveFile();
     wallImage = Image.asset(
       'assets/wall.jpg',
         fit: BoxFit.fill,
@@ -142,6 +147,19 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     await precacheImage(wallImage.image, context);
   }
 
+  void _loadRiveFile() async {
+    final bytes = await rootBundle.load(riveFileName);
+    final file = RiveFile();
+
+    if (file.import(bytes)) {
+      // Select an animation by its name
+      setState(() => _artboard = file.mainArtboard
+        ..addController(
+          SimpleAnimation('Untitled 1'),
+        ));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     dartProvider = Provider.of<DartProvider>(context);
@@ -180,6 +198,15 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                     ],
                   ),
+                  _artboard != null
+                      ? Padding(
+                        padding: const EdgeInsets.fromLTRB(830, 20, 20, 0),
+                        child: Rive(
+                    artboard: _artboard,
+                    fit: BoxFit.contain,
+                  ),
+                      )
+                      : Container(),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(0.0, 0.0, 40, 100),
                     child: Container(
