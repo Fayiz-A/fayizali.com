@@ -23,7 +23,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     _loadRiveFile();
     wallImage = Image.asset(
       'assets/wall.jpg',
-        fit: BoxFit.fill,
+      fit: BoxFit.fill,
       width: window.physicalSize.width,
       height: window.physicalSize.height,
     );
@@ -71,7 +71,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _onDartDragged(DragUpdateDetails details) {
-    dartProvider.dragPosition = details.localPosition;
+    dartProvider.dragPosition = details.globalPosition;
   }
 
   double leverContainerHeight;
@@ -112,134 +112,104 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     }
   }
 
+  Widget _renderDart() {
+    DartProvider dartProvider = Provider.of<DartProvider>(context);
+    Offset offset = dartProvider.dragPosition;
+    double scaleValue = dartProvider.scaleValue;
+    return Positioned(
+        left: offset.dx,
+        top: offset.dy,
+        child: GestureDetector(
+          onPanUpdate: _onDartDragged,
+          child: ScaleTransition(
+            scale: Tween(begin: scaleValue, end: 1.5)
+                .animate(dartAnimationController),
+            child: Dart(),
+          ),
+        ));
+  }
+
+  Widget _renderBoard() {
+    return AnimatedBuilder(
+      animation: dartBoardSlideAnimation,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(
+              0,
+              dartBoardSlideAnimation.value *
+                  ((MediaQuery.of(context).size.height / 4))),
+          child: child,
+        );
+      },
+      child: Image.asset(
+        'assets/dart_board.png',
+      ),
+    );
+  }
+
+  Widget _renderLever() {
+    return Container(
+        width: 200, //TODO: Remove this hardcoding
+        height: MediaQuery.of(context).size.height * 0.4,
+        child: SlideTransition(
+          position: leverDartSlideAnimation,
+          child: Container(
+            key: leverKey,
+            alignment: Alignment.bottomCenter,
+            decoration: BoxDecoration(
+                color: Colors.green,
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.all(Radius.circular(400))
+              ),
+            child: Consumer<LeverProvider>(
+              child: GestureDetector(
+                  onVerticalDragUpdate: _onReleaseLeverDragged,
+                  onVerticalDragEnd: (DragEndDetails details) {
+                    leverProvider.leverDragged = true;
+
+                    dartAnimationController.forward();
+                  },
+                  child: CircleAvatar(
+                    backgroundColor: Colors.white,
+                  )
+                ),
+              builder: (context, provider, child) {
+                double leverPosition = provider.dragPosition;
+                bool leverDragged = provider.leverDragged;
+
+                return AnimatedPadding(
+                  duration: leverDragged == true
+                      ? dartAnimationController.duration
+                      : Duration.zero,
+                  padding: EdgeInsets.fromLTRB(8.0, 8.0, 8.0, leverPosition),
+                  child: child,
+                );
+              },
+            ),
+          ),
+        ));
+  }
+
   @override
   Widget build(BuildContext context) {
     dartProvider = Provider.of<DartProvider>(context);
     leverProvider = Provider.of<LeverProvider>(context);
 
     return Scaffold(
-        body: Row(
-      children: [
-        Expanded(
-          child: Stack(
-            children: [
-              Stack(
-                alignment: Alignment.bottomRight,
-                children: [
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      wallImage,
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 70.0),
-                        child: AnimatedBuilder(
-                          animation: dartBoardSlideAnimation,
-                          builder: (context, child) {
-                            return Transform.translate(
-                              offset: Offset(
-                                  0,
-                                  dartBoardSlideAnimation.value *
-                                      ((MediaQuery.of(context).size.height / 4))),
-                              child: child,
-                            );
-                          },
-                          child: Image.asset(
-                            'assets/dart_board.png',
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  // _artboard != null
-                  //     ? Padding(
-                  //       padding: const EdgeInsets.fromLTRB(830, 20, 20, 0),//TODO: Remove this hardcoding
-                  //       child: Rive(
-                  //   artboard: _artboard,
-                  //   fit: BoxFit.contain,
-                  // ),
-                  //     )
-                  //     : Container(),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(0.0, 0.0, 40, 100),
-                    child: Container(
-                      width: 50,//TODO: Remove this hardcoding
-                      height: MediaQuery.of(context).size.height * 0.4,
-                      child: SlideTransition(
-                        position: leverDartSlideAnimation,
-                        child: Container(
-                          key: leverKey,
-                          alignment: Alignment.bottomCenter,
-                          decoration: BoxDecoration(
-                              color: Colors.green,
-                              shape: BoxShape.rectangle,
-                              borderRadius:
-                                  BorderRadius.all(Radius.circular(400))),
-                          child: Consumer<LeverProvider>(
-                            child: GestureDetector(
-                                onVerticalDragUpdate: _onReleaseLeverDragged,
-                                onVerticalDragEnd: (DragEndDetails details) {
-                                  leverProvider.leverDragged = true;
-
-                                  dartAnimationController.forward();
-                                  // leverAnimationController.reverse(from: 1.0);
-                                },
-                                child: CircleAvatar(
-                                  backgroundColor: Colors.white,
-                                )),
-                            builder: (context, provider, child) {
-                              double leverPosition = provider.dragPosition;
-                              bool leverDragged = provider.leverDragged;
-
-                              return AnimatedPadding(
-                                duration: leverDragged == true
-                                    ? dartAnimationController.duration
-                                    : Duration.zero,
-                                padding: EdgeInsets.fromLTRB(
-                                    8.0, 8.0, 8.0, leverPosition),
-                                child: child,
-                              );
-                            },
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Consumer<DartProvider>(
-                child: Dart(),
-                builder: (context, provider, child) {
-                  Offset offset = provider.dragPosition;
-                  double scaleValue = provider.scaleValue;
-
-                  return GestureDetector(
-                    onPanUpdate: _onDartDragged,
-                    child: Container(
-                      padding: EdgeInsets.only(top: offset.dy, left: offset.dx),
-                      child: ScaleTransition(
-                        scale: Tween(begin: scaleValue, end: 1.5)
-                            .animate(dartAnimationController),
-                        child: child,
-                      ),
-                    ),
-                  );
-                },
-              ),
-              //TODO: Remove the widget below as it is only for ease of testing
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: ElevatedButton(
-                  child: Text('Release'),
-                  onPressed: () {
-                    dartAnimationController.forward();
-                  },
-                ),
-              )
-            ],
-          ),
+      body: Stack(children: <Widget>[
+        wallImage,
+        _renderDart(),
+        Align(
+          alignment: Alignment.center,
+          child: _renderBoard()
         ),
-      ],
-    ));
+        Positioned(
+          right: 40,//TODO: Remove this hardcoding
+          bottom: 40,//TODO: Remove this hardcoding
+          child: _renderLever(),
+        )
+      ]),
+    );
   }
 }
 
