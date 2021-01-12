@@ -2,9 +2,7 @@ import 'package:flutter/material.dart';
 import 'dart:ui';
 import 'package:fayizali/providers/dart_provider.dart';
 import 'package:fayizali/providers/lever_provider.dart';
-import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:rive/rive.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -13,14 +11,11 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Image wallImage;
-  final riveFileName = 'parchment.riv';
-  Artboard _artboard;
 
   @override
   void initState() {
     super.initState();
     prepareAnimations();
-    _loadRiveFile();
     wallImage = Image.asset(
       'assets/wall.jpg',
       fit: BoxFit.fill,
@@ -99,19 +94,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     await precacheImage(wallImage.image, context);
   }
 
-  void _loadRiveFile() async {
-    final bytes = await rootBundle.load(riveFileName);
-    final file = RiveFile();
-
-    if (file.import(bytes)) {
-      // Select an animation by its name
-      setState(() => _artboard = file.mainArtboard
-        ..addController(
-          SimpleAnimation('Untitled 1'),
-        ));
-    }
-  }
-
   Widget _renderDart() {
     DartProvider dartProvider = Provider.of<DartProvider>(context);
     Offset offset = dartProvider.dragPosition;
@@ -130,64 +112,64 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _renderBoard() {
-    return AnimatedBuilder(
-      animation: dartBoardSlideAnimation,
-      builder: (context, child) {
-        return Transform.translate(
-          offset: Offset(
-              0,
-              dartBoardSlideAnimation.value *
-                  ((MediaQuery.of(context).size.height / 4))),
-          child: child,
-        );
-      },
-      child: Image.asset(
-        'assets/dart_board.png',
+    return Padding(
+      padding: const EdgeInsets.all(40.0), //TODO: Remove this hardcoding
+      child: AnimatedBuilder(
+        animation: dartBoardSlideAnimation,
+        builder: (context, child) {
+          return Transform.translate(
+            offset: Offset(
+                0,
+                dartBoardSlideAnimation.value *
+                    ((MediaQuery.of(context).size.height / 4))),
+            child: child,
+          );
+        },
+        child: Image.asset(
+          'assets/dart_board.png',
+        ),
       ),
     );
   }
 
   Widget _renderLever() {
-    return Container(
-        width: 200, //TODO: Remove this hardcoding
-        height: MediaQuery.of(context).size.height * 0.4,
-        child: SlideTransition(
-          position: leverDartSlideAnimation,
-          child: Container(
-            key: leverKey,
-            alignment: Alignment.bottomCenter,
-            decoration: BoxDecoration(
-                color: Colors.green,
-                shape: BoxShape.rectangle,
-                borderRadius: BorderRadius.all(Radius.circular(400))
-              ),
-            child: Consumer<LeverProvider>(
-              child: GestureDetector(
-                  onVerticalDragUpdate: _onReleaseLeverDragged,
-                  onVerticalDragEnd: (DragEndDetails details) {
-                    leverProvider.leverDragged = true;
+    return SlideTransition(
+      position: leverDartSlideAnimation,
+      child: Container(
+        key: leverKey,
+        width: 50.0, //TODO: Remove this hardcoding
+        height: MediaQuery.of(context).size.height / 2.5,
+        alignment: Alignment.bottomCenter,
+        decoration: BoxDecoration(
+            color: Colors.green,
+            shape: BoxShape.rectangle,
+            borderRadius: BorderRadius.all(Radius.circular(400))),
+        child: Consumer<LeverProvider>(
+          child: GestureDetector(
+              onVerticalDragUpdate: _onReleaseLeverDragged,
+              onVerticalDragEnd: (DragEndDetails details) {
+                leverProvider.leverDragged = true;
 
-                    dartAnimationController.forward();
-                  },
-                  child: CircleAvatar(
-                    backgroundColor: Colors.white,
-                  )
-                ),
-              builder: (context, provider, child) {
-                double leverPosition = provider.dragPosition;
-                bool leverDragged = provider.leverDragged;
-
-                return AnimatedPadding(
-                  duration: leverDragged == true
-                      ? dartAnimationController.duration
-                      : Duration.zero,
-                  padding: EdgeInsets.fromLTRB(8.0, 8.0, 8.0, leverPosition),
-                  child: child,
-                );
+                dartAnimationController.forward();
               },
-            ),
-          ),
-        ));
+              child: CircleAvatar(
+                backgroundColor: Colors.white,
+              )),
+          builder: (context, provider, child) {
+            double leverPosition = provider.dragPosition;
+            bool leverDragged = provider.leverDragged;
+
+            return AnimatedPadding(
+              duration: leverDragged == true
+                  ? dartAnimationController.duration
+                  : Duration.zero,
+              padding: EdgeInsets.fromLTRB(8.0, 8.0, 8.0, leverPosition),
+              child: child,
+            );
+          },
+        ),
+      ),
+    );
   }
 
   @override
@@ -198,14 +180,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     return Scaffold(
       body: Stack(children: <Widget>[
         wallImage,
+        Align(alignment: Alignment.center, child: _renderBoard()),
         _renderDart(),
-        Align(
-          alignment: Alignment.center,
-          child: _renderBoard()
-        ),
         Positioned(
-          right: 40,//TODO: Remove this hardcoding
-          bottom: 40,//TODO: Remove this hardcoding
+          right: 40, //TODO: Remove this hardcoding
+          bottom: 40, //TODO: Remove this hardcoding
           child: _renderLever(),
         )
       ]),

@@ -33,18 +33,16 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (_) => LeverProvider()),
-          ChangeNotifierProvider(create: (_) => DartProvider())
-        ],
-        child: MaterialApp(
-          title: 'Fayiz Ali',
-          theme: ThemeData(
-            brightness: Brightness.dark,
-            primarySwatch: Colors.red
-          ),
-          home: HomePage(),
-        ),
-      );
+      providers: [
+        ChangeNotifierProvider(create: (_) => LeverProvider()),
+        ChangeNotifierProvider(create: (_) => DartProvider())
+      ],
+      child: MaterialApp(
+        title: 'Fayiz Ali',
+        theme:
+            ThemeData(brightness: Brightness.dark, primarySwatch: Colors.red),
+        home: HomePage(),
+      ),
+    );
   }
 }
