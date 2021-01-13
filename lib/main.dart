@@ -21,6 +21,7 @@
 //packages and plugins
 import 'package:fayizali/providers/dart_provider.dart';
 import 'package:fayizali/providers/lever_provider.dart';
+import 'package:fayizali/routes/computer_languages_page.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -38,10 +39,11 @@ class MyApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => DartProvider())
       ],
       child: MaterialApp(
+        debugShowCheckedModeBanner: false,
         title: 'Fayiz Ali',
         theme:
             ThemeData(brightness: Brightness.dark, primarySwatch: Colors.red),
-        home: HomePage(),
+        home: ComputerLanguagesPage(),
       ),
     );
   }
