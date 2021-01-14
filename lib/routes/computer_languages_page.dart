@@ -106,7 +106,7 @@ class FramePainter extends CustomPainter {
       ..color = Colors.redAccent
       ..strokeWidth = 2;
 
-    canvas.drawShadow(bottomRightCurvePath, Colors.black, 20.0, false);
+    canvas.drawShadow(bottomRightCurvePath, Colors.black, 100.0, false);
     canvas.drawPath(bottomRightCurvePath, bottomRightCurvePaint);
 
     drawArcWithOutlineCircle(
@@ -135,7 +135,7 @@ class FramePainter extends CustomPainter {
     Rect halfCircleRect = Rect.fromCircle(center: center, radius: radius);
 
     if(drawShadow) canvas.drawShadow(Path()..arcTo(halfCircleRect, 0, -Math.pi, false),
-        Colors.black, 20.0, false);
+        Colors.black, 50.0, false);
     canvas.drawArc(
         halfCircleRect, 0, angleInRadians ?? -Math.pi, true, halfCirclePaint);
   }
