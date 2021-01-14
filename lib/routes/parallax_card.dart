@@ -1,12 +1,13 @@
 import 'package:fayizali/widgets/custom_card.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
-class HomePage extends StatefulWidget {
+class ParallaxCard extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState();
+  _ParallaxCardState createState() => _ParallaxCardState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _ParallaxCardState extends State<ParallaxCard> {
   PageController pageController = PageController(viewportFraction: 0.8);
 
   double _pageIndex = 0;
@@ -27,26 +28,16 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.green,
-        title: Text('Fayiz Ali'),
-      ),
-      body: Center(
-          child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: PageView(
-          controller: pageController,
-          children: [
-            CustomCard(
-              pageIndex: _pageIndex - 1,
-            ),
-            CustomCard(
-              pageIndex: _pageIndex,
-            )
-          ],
+    return PageView(
+      controller: pageController,
+      children: [
+        CustomCard(
+          pageIndex: _pageIndex - 1,
         ),
-      )),
+        CustomCard(
+          pageIndex: _pageIndex,
+        )
+      ],
     );
   }
 }
