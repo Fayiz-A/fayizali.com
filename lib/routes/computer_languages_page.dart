@@ -64,15 +64,36 @@ class FramePainter extends CustomPainter {
         mainCoordinatesMap['bottomLeft'].dx + bottomCenterArcRadius * 1.7,
         mainCoordinatesMap['bottomLeft'].dy + (bottomCenterArcRadius * 0.25));
 
-    drawHalfCircleWithOutlineCircle(canvas: canvas, innerCircleRadius: bottomCenterArcRadius, radiusDifference: 50, innerCircleColor: Colors.red, outerCircleColor: Colors.blue, center: bottomCenterArcCenter, mainCoordinatesMap: mainCoordinatesMap);
+    drawArcWithOutlineCircle(canvas: canvas, innerCircleRadius: bottomCenterArcRadius*2-30, radiusDifference: 30, innerCircleColor: Colors.red, outerCircleColor: Colors.white, center: mainCoordinatesMap['bottomLeft'], mainCoordinatesMap: mainCoordinatesMap);
+
+    drawArcWithOutlineCircle(canvas: canvas, innerCircleRadius: bottomCenterArcRadius, radiusDifference: 30, innerCircleColor: Colors.yellow, outerCircleColor: Colors.white, center: bottomCenterArcCenter, mainCoordinatesMap: mainCoordinatesMap);
+
+    double bottomCenterRightArcRadius = size.height * 0.20;
+    Offset bottomCenterRightArcCenter = Offset(mainCoordinatesMap['bottomRight'].dx - size.width * 0.2, mainCoordinatesMap['bottomRight'].dy);
+    double bottomCenterRightArcRadiusCenter = 30.0;
+
+    Path bottomRightCurvePath = Path()
+    ..moveTo(mainCoordinatesMap['bottomRight'].dx, mainCoordinatesMap['bottomRight'].dy)
+    ..lineTo(mainCoordinatesMap['centerRight'].dx, mainCoordinatesMap['centerRight'].dy)
+    ..quadraticBezierTo(mainCoordinatesMap['bottomRight'].dx, mainCoordinatesMap['bottomRight'].dy-(mainCoordinatesMap['centerRight'].dy/2), bottomCenterRightArcCenter.dx - bottomCenterRightArcRadius, bottomCenterRightArcCenter.dy)
+    ..close();
+    
+    Paint bottomRightCurvePaint = Paint()
+        ..color = Colors.redAccent
+        ..strokeWidth = 2;
+
+    canvas.drawPath(bottomRightCurvePath, bottomRightCurvePaint);
+
+    drawArcWithOutlineCircle(canvas: canvas, innerCircleRadius: bottomCenterRightArcRadius, radiusDifference: bottomCenterRightArcRadiusCenter, innerCircleColor: Colors.blue, outerCircleColor: Colors.white, center: bottomCenterRightArcCenter, mainCoordinatesMap: mainCoordinatesMap);
   }
 
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 
-  void drawHalfCircle(
+  void drawArc(
       {@required Canvas canvas,
       @required double radius,
+      double angleInRadians,
       Color color,
       @required Offset center,
       @required Map<String, Offset> mainCoordinatesMap}) {
@@ -80,10 +101,10 @@ class FramePainter extends CustomPainter {
 
     Rect halfCircleRect = Rect.fromCircle(center: center, radius: radius);
 
-    canvas.drawArc(halfCircleRect, 0, -Math.pi, true, halfCirclePaint);
+    canvas.drawArc(halfCircleRect, 0, angleInRadians ?? -Math.pi, true, halfCirclePaint);
   }
 
-  void drawHalfCircleWithOutlineCircle(
+  void drawArcWithOutlineCircle(
     {@required Canvas canvas,
       @required double innerCircleRadius,
       @required double radiusDifference,
@@ -92,8 +113,8 @@ class FramePainter extends CustomPainter {
       @required Offset center,
       @required Map<String, Offset> mainCoordinatesMap}
   ) {
-    drawHalfCircle(canvas: canvas, radius: innerCircleRadius + radiusDifference, center: center, mainCoordinatesMap: mainCoordinatesMap, color: outerCircleColor);
-    drawHalfCircle(canvas: canvas, radius: innerCircleRadius, center: center, mainCoordinatesMap: mainCoordinatesMap, color: innerCircleColor);
+    drawArc(canvas: canvas, radius: innerCircleRadius + radiusDifference, center: center, mainCoordinatesMap: mainCoordinatesMap, color: outerCircleColor);
+    drawArc(canvas: canvas, radius: innerCircleRadius, center: center, mainCoordinatesMap: mainCoordinatesMap, color: innerCircleColor);
 
   }
 }
