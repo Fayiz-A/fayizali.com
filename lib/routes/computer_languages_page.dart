@@ -57,6 +57,7 @@ class FramePainter extends CustomPainter {
       ..quadraticBezierTo(280, 25, 290, 0)
       ..close();
 
+    canvas.drawShadow(topCurvePath, Colors.black, 20.0, false);
     canvas.drawPath(topCurvePath, topCurvePaint);
 
     double bottomCenterArcRadius = size.height * 0.18;
@@ -64,27 +65,58 @@ class FramePainter extends CustomPainter {
         mainCoordinatesMap['bottomLeft'].dx + bottomCenterArcRadius * 1.7,
         mainCoordinatesMap['bottomLeft'].dy + (bottomCenterArcRadius * 0.25));
 
-    drawArcWithOutlineCircle(canvas: canvas, innerCircleRadius: bottomCenterArcRadius*2-30, radiusDifference: 30, innerCircleColor: Colors.red, outerCircleColor: Colors.white, center: mainCoordinatesMap['bottomLeft'], mainCoordinatesMap: mainCoordinatesMap);
+    drawArcWithOutlineCircle(
+        canvas: canvas,
+        innerCircleRadius: bottomCenterArcRadius * 2 - 30,
+        radiusDifference: 30,
+        innerCircleColor: Colors.red,
+        outerCircleColor: Colors.white,
+        center: mainCoordinatesMap['bottomLeft'],
+        mainCoordinatesMap: mainCoordinatesMap);
 
-    drawArcWithOutlineCircle(canvas: canvas, innerCircleRadius: bottomCenterArcRadius, radiusDifference: 30, innerCircleColor: Colors.yellow, outerCircleColor: Colors.white, center: bottomCenterArcCenter, mainCoordinatesMap: mainCoordinatesMap);
+    drawArcWithOutlineCircle(
+        canvas: canvas,
+        innerCircleRadius: bottomCenterArcRadius,
+        radiusDifference: 30,
+        innerCircleColor: Colors.yellow,
+        outerCircleColor: Colors.white,
+        center: bottomCenterArcCenter,
+        mainCoordinatesMap: mainCoordinatesMap);
 
     double bottomCenterRightArcRadius = size.height * 0.20;
-    Offset bottomCenterRightArcCenter = Offset(mainCoordinatesMap['bottomRight'].dx - size.width * 0.2, mainCoordinatesMap['bottomRight'].dy);
+    Offset bottomCenterRightArcCenter = Offset(
+        mainCoordinatesMap['bottomRight'].dx - size.width * 0.2,
+        mainCoordinatesMap['bottomRight'].dy);
     double bottomCenterRightArcRadiusCenter = 30.0;
 
     Path bottomRightCurvePath = Path()
-    ..moveTo(mainCoordinatesMap['bottomRight'].dx, mainCoordinatesMap['bottomRight'].dy)
-    ..lineTo(mainCoordinatesMap['centerRight'].dx, mainCoordinatesMap['centerRight'].dy)
-    ..quadraticBezierTo(mainCoordinatesMap['bottomRight'].dx, mainCoordinatesMap['bottomRight'].dy-(mainCoordinatesMap['centerRight'].dy/2), bottomCenterRightArcCenter.dx - bottomCenterRightArcRadius, bottomCenterRightArcCenter.dy)
-    ..close();
-    
-    Paint bottomRightCurvePaint = Paint()
-        ..color = Colors.redAccent
-        ..strokeWidth = 2;
+      ..moveTo(mainCoordinatesMap['bottomRight'].dx,
+          mainCoordinatesMap['bottomRight'].dy)
+      ..lineTo(mainCoordinatesMap['centerRight'].dx,
+          mainCoordinatesMap['centerRight'].dy)
+      ..quadraticBezierTo(
+          mainCoordinatesMap['bottomRight'].dx,
+          mainCoordinatesMap['bottomRight'].dy -
+              (mainCoordinatesMap['centerRight'].dy / 2),
+          bottomCenterRightArcCenter.dx - bottomCenterRightArcRadius,
+          bottomCenterRightArcCenter.dy)
+      ..close();
 
+    Paint bottomRightCurvePaint = Paint()
+      ..color = Colors.redAccent
+      ..strokeWidth = 2;
+
+    canvas.drawShadow(bottomRightCurvePath, Colors.black, 20.0, false);
     canvas.drawPath(bottomRightCurvePath, bottomRightCurvePaint);
 
-    drawArcWithOutlineCircle(canvas: canvas, innerCircleRadius: bottomCenterRightArcRadius, radiusDifference: bottomCenterRightArcRadiusCenter, innerCircleColor: Colors.blue, outerCircleColor: Colors.white, center: bottomCenterRightArcCenter, mainCoordinatesMap: mainCoordinatesMap);
+    drawArcWithOutlineCircle(
+        canvas: canvas,
+        innerCircleRadius: bottomCenterRightArcRadius,
+        radiusDifference: bottomCenterRightArcRadiusCenter,
+        innerCircleColor: Colors.blue,
+        outerCircleColor: Colors.white,
+        center: bottomCenterRightArcCenter,
+        mainCoordinatesMap: mainCoordinatesMap);
   }
 
   @override
@@ -95,26 +127,39 @@ class FramePainter extends CustomPainter {
       @required double radius,
       double angleInRadians,
       Color color,
+      bool drawShadow = false,
       @required Offset center,
       @required Map<String, Offset> mainCoordinatesMap}) {
     Paint halfCirclePaint = Paint()..color = color ?? Colors.white;
 
     Rect halfCircleRect = Rect.fromCircle(center: center, radius: radius);
 
-    canvas.drawArc(halfCircleRect, 0, angleInRadians ?? -Math.pi, true, halfCirclePaint);
+    if(drawShadow) canvas.drawShadow(Path()..arcTo(halfCircleRect, 0, -Math.pi, false),
+        Colors.black, 20.0, false);
+    canvas.drawArc(
+        halfCircleRect, 0, angleInRadians ?? -Math.pi, true, halfCirclePaint);
   }
 
   void drawArcWithOutlineCircle(
-    {@required Canvas canvas,
+      {@required Canvas canvas,
       @required double innerCircleRadius,
       @required double radiusDifference,
       @required Color innerCircleColor,
       @required Color outerCircleColor,
       @required Offset center,
-      @required Map<String, Offset> mainCoordinatesMap}
-  ) {
-    drawArc(canvas: canvas, radius: innerCircleRadius + radiusDifference, center: center, mainCoordinatesMap: mainCoordinatesMap, color: outerCircleColor);
-    drawArc(canvas: canvas, radius: innerCircleRadius, center: center, mainCoordinatesMap: mainCoordinatesMap, color: innerCircleColor);
-
+      @required Map<String, Offset> mainCoordinatesMap}) {
+    drawArc(
+        canvas: canvas,
+        radius: innerCircleRadius + radiusDifference,
+        center: center,
+        drawShadow: true,
+        mainCoordinatesMap: mainCoordinatesMap,
+        color: outerCircleColor);
+    drawArc(
+        canvas: canvas,
+        radius: innerCircleRadius,
+        center: center,
+        mainCoordinatesMap: mainCoordinatesMap,
+        color: innerCircleColor);
   }
 }
