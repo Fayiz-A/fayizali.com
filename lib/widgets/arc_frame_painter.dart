@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
+import 'dart:math' as math;
 import 'dart:ui' as ui;
-import 'dart:math' as Math;
+import 'package:flutter/material.dart';
 
 class FramePainter extends CustomPainter {
   @override
@@ -119,10 +119,10 @@ class FramePainter extends CustomPainter {
 
     Rect halfCircleRect = Rect.fromCircle(center: center, radius: radius);
 
-    if(drawShadow) canvas.drawShadow(Path()..arcTo(halfCircleRect, 0, -Math.pi, false),
+    if(drawShadow) canvas.drawShadow(Path()..arcTo(halfCircleRect, 0, -math.pi, false),
         Colors.black, 50.0, false);
     canvas.drawArc(
-        halfCircleRect, 0, angleInRadians ?? -Math.pi, true, halfCirclePaint);
+        halfCircleRect, 0, angleInRadians ?? -math.pi, true, halfCirclePaint);
   }
 
   void drawArcWithOutlineCircle(

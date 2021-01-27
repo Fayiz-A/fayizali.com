@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'dart:ui';
+import 'package:flutter/material.dart';
 import 'package:fayizali/providers/dart_provider.dart';
 import 'package:fayizali/providers/lever_provider.dart';
 import 'package:provider/provider.dart';
@@ -30,6 +30,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.didChangeDependencies();
   }
 
+  @override
   void dispose() {
     super.dispose();
     dartAnimationController.dispose();
@@ -121,7 +122,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             offset: Offset(
                 0,
                 dartBoardSlideAnimation.value *
-                    ((MediaQuery.of(context).size.height / 4))),
+                    (MediaQuery.of(context).size.height / 4)),
             child: child,
           );
         },

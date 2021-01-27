@@ -1,75 +1,81 @@
 import 'package:fayizali/blocs/url_bloc.dart';
+import 'package:fayizali/routes/parallax_card.dart';
 import 'package:fayizali/widgets/arc_frame_painter.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
 class ComputerLanguagesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-
     UrlBloc urlBloc = Provider.of<UrlBloc>(context);
 
+    Size windowSize = MediaQuery.of(context).size;
+
+    double contentCardHeight = windowSize.height * 0.6;//width is decided by the page view in parallax card
+    double contentCardImageWidth = contentCardHeight * 0.7;
+
+    double languageNameFontSize = windowSize.height * 0.06;
     List<Map<String, dynamic>> contentList = [
       {
         'text': 'React Native',
-        'icon': Icon(Icons.edit, size: 40,),
+        'icon': Image.network('https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/React-icon.svg/1280px-React-icon.svg.png', height: languageNameFontSize,),
         'programs': [
           {
             'name': 'Something',
-            'image': Placeholder(fallbackHeight: 350),
+            'image': Placeholder(fallbackHeight: contentCardImageWidth),
             'link': 'http://oliventech.com'
           },
           {
             'name': 'Something',
-            'image': Placeholder(fallbackHeight: 350),
+            'image': Placeholder(fallbackHeight: contentCardImageWidth),
             'link': 'http://oliventech.com'
           },
           {
             'name': 'Something',
-            'image': Placeholder(fallbackHeight: 350),
+            'image': Placeholder(fallbackHeight: contentCardImageWidth),
             'link': 'http://oliventech.com'
           },
           {
             'name': 'Something',
-            'image': Placeholder(fallbackHeight: 350),
+            'image': Placeholder(fallbackHeight: contentCardImageWidth),
             'link': 'http://oliventech.com'
           },
         ]
       },
       {
         'text': 'Flutter',
-        'icon': Icon(Icons.star, size: 40,),
+        'icon': FlutterLogo(size: languageNameFontSize,),
         'programs': [
           {
             'name': 'Something',
-            'image': Placeholder(fallbackHeight: 350),
+            'image': Placeholder(fallbackHeight: contentCardImageWidth),
             'link': 'http://oliventech.com'
           },
           {
             'name': 'Something',
-            'image': Placeholder(fallbackHeight: 350),
+            'image': Placeholder(fallbackHeight: contentCardImageWidth),
             'link': 'http://oliventech.com'
           },
         ]
       },
       {
         'text': 'Python',
-        'icon': Icon(Icons.watch_later_outlined, size: 40,),
+        'icon': Image.network('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/Python-logo-notext.svg/768px-Python-logo-notext.svg.png', height: languageNameFontSize,),
         'programs': [
           {
             'name': 'Something',
-            'image': Placeholder(fallbackHeight: 350),
+            'image': Placeholder(fallbackHeight: contentCardImageWidth),
             'link': 'http://oliventech.com'
           },
           {
             'name': 'Something',
-            'image': Placeholder(fallbackHeight: 350),
+            'image': Placeholder(fallbackHeight: contentCardImageWidth),
             'link': 'http://oliventech.com'
           },
           {
             'name': 'Something',
-            'image': Placeholder(fallbackHeight: 350),
+            'image': Placeholder(fallbackHeight: contentCardImageWidth),
             'link': 'http://oliventech.com'
           },
         ]
@@ -84,58 +90,89 @@ class ComputerLanguagesPage extends StatelessWidget {
           child: CustomPaint(
             size: Size.infinite,
             foregroundPainter: FramePainter(),
-            child: Center(
-              child: ListView.builder(
-                padding: EdgeInsets.symmetric(vertical: MediaQuery.of(context).size.height * 0.18),
-                shrinkWrap: true,
-                itemCount: contentList.length,
-                itemBuilder: (BuildContext context, int itemIndex) {
-                  Map<String, dynamic> item = contentList[itemIndex];
-                  return Center(
-                      child: Column(
+            child: ListView.builder(
+              padding: EdgeInsets.only(
+                  top: windowSize.height * 0.05, bottom: windowSize.height * 0.2),
+              shrinkWrap: true,
+              itemCount: contentList.length,
+              itemBuilder: (BuildContext context, int itemIndex) {
+                Map<String, dynamic> item = contentList[itemIndex];
+                return Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 20.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        mainAxisSize: MainAxisSize.min,
                         children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Text(item['text'].toString(), style: TextStyle(fontSize: 40),),
-                              item['icon'],
-                            ],
+                          item['icon'],
+                          Text(
+                            item['text'].toString(),
+                            style: TextStyle(fontSize: languageNameFontSize),
                           ),
-                          SizedBox(
-                            height: MediaQuery.of(context).size.height/2,
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width / 10),
-                              scrollDirection: Axis.horizontal,
-                              itemCount: item['programs'].length,
-                              itemBuilder: (BuildContext context, int programIndex) {
-                                Map<String, dynamic> program = item['programs'][programIndex];
-                                return Card(
-                                  elevation: 10.0,
-                                  shadowColor: Colors.black,
-                                  child: Material(
-                                    child: InkWell(
-                                      onTap: () => urlBloc.add(UrlLaunchEvent(url: program['link'])),
-                                      child: Column(
-                                        children: [
-                                          program['image'],
-                                          Text(program['name'])
-                                        ],
-                                      ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: contentCardHeight,
+                      child: ParallaxWidget(
+                        itemCount: item['programs'].length,
+                        viewPortFraction: 0.7,
+                        renderChildInPageView: (int programIndex) {
+                          Map<String, dynamic> program =
+                          item['programs'][programIndex];
+                          return Padding(
+                            padding: const EdgeInsets.only(right: 40),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.all(Radius.circular(50.0)),
+                              child: Card(
+                                elevation: 80.0,
+                                child: Material(
+                                  child: InkWell(
+                                    onTap: () => urlBloc
+                                        .add(UrlLaunchEvent(url: program['link'])),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      mainAxisAlignment: MainAxisAlignment.start,
+                                      children: [
+                                        program['image'],
+                                        Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Text(program['name'], style: TextStyle(fontSize: windowSize.height*0.03),),
+                                        ),
+                                        Expanded(
+                                          child: Align(
+                                            alignment: Alignment.bottomRight,
+                                            child: Padding(
+                                              padding: const EdgeInsets.symmetric(vertical: 15.0, horizontal: 15.0),
+                                              child: ElevatedButton(
+                                                onPressed: () => urlBloc
+                                                    .add(UrlLaunchEvent(url: program['link'])),
+                                                style: ButtonStyle(
+                                                    padding: MaterialStateProperty.all(EdgeInsets.symmetric(horizontal: 20.0, vertical: 15.0)),
+                                                    shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.horizontal(left: Radius.circular(40.0), right: Radius.circular(40.0))))
+                                                ),
+                                                child: Text('View', style: TextStyle(fontSize: windowSize.height*0.03),),
+                                              ),
+                                            ),
+                                          ),
+                                        )
+                                      ],
                                     ),
                                   ),
-                                );
-                              },
+                                ),
+                              ),
                             ),
-                          )
-                        ],
-                      )
-                  );
-                },
-              ),
+                          );
+                        },
+                      ),
+                    )
+                  ],
+                );
+              },
             ),
           ),
-        ));
+        )
+    );
   }
 }

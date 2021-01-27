@@ -1,24 +1,30 @@
 import 'package:fayizali/widgets/custom_card.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
-class ParallaxCard extends StatefulWidget {
+class ParallaxWidget extends StatefulWidget {
+  
+  final int itemCount;
+  final double viewPortFraction;
+  final Widget Function(int index) renderChildInPageView;
+
+  ParallaxWidget({
+    @required this.itemCount,
+    @required this.viewPortFraction,
+    @required this.renderChildInPageView,
+  });
+  
   @override
-  _ParallaxCardState createState() => _ParallaxCardState();
+  _ParallaxWidgetState createState() => _ParallaxWidgetState();
 }
 
-class _ParallaxCardState extends State<ParallaxCard> {
-  PageController pageController = PageController(viewportFraction: 0.8);
+class _ParallaxWidgetState extends State<ParallaxWidget> {
+  PageController pageController;
 
-  double _pageIndex = 0;
-
+  @override
   void initState() {
     super.initState();
 
-    pageController.addListener(() {
-      _pageIndex = pageController.page;
-      setState(() {});
-    });
+    pageController = PageController(viewportFraction: widget.viewPortFraction);
   }
 
   @override
@@ -31,12 +37,8 @@ class _ParallaxCardState extends State<ParallaxCard> {
     return PageView(
       controller: pageController,
       children: [
-        CustomCard(
-          pageIndex: _pageIndex - 1,
-        ),
-        CustomCard(
-          pageIndex: _pageIndex,
-        )
+        for(int index = 0; index<widget.itemCount; index++)
+          widget.renderChildInPageView(index),
       ],
     );
   }
