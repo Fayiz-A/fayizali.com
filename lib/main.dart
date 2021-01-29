@@ -1,3 +1,5 @@
+import 'package:fayizali/blocs/circle_sector_coordinates_bloc.dart';
+import 'package:fayizali/blocs/math_bloc.dart';
 import 'package:fayizali/blocs/url_bloc.dart';
 import 'package:fayizali/providers/dart_provider.dart';
 import 'package:fayizali/providers/lever_provider.dart';
@@ -15,7 +17,9 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => LeverProvider()),
         ChangeNotifierProvider(create: (_) => DartProvider()),
-        BlocProvider(create: (_) => UrlBloc())
+        BlocProvider(create: (_) => UrlBloc()),
+        BlocProvider(create: (_) => MathBloc()),
+        BlocProvider(create: (_) => CircleSectorCoordinatesBloc())
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
