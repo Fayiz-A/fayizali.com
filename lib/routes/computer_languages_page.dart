@@ -1,6 +1,7 @@
 import 'dart:ui';
 
 import 'package:fayizali/blocs/circle_sector_coordinates_bloc.dart';
+import 'package:fayizali/blocs/math_bloc.dart';
 import 'package:fayizali/blocs/url_bloc.dart';
 import 'package:fayizali/routes/parallax_card.dart';
 import 'package:fayizali/widgets/arc_frame_painter.dart';
@@ -12,13 +13,7 @@ class ComputerLanguagesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     UrlBloc urlBloc = Provider.of<UrlBloc>(context);
-    CircleSectorCoordinatesBloc circleSectorCoordinatesBloc = Provider.of<CircleSectorCoordinatesBloc>(context);
 
-    circleSectorCoordinatesBloc.add(CircleSectorEndCoordinatesIdentifierEvent(radius: 50, numberOfSectors: 10, center: Offset(MediaQuery.of(context).size.width / 2, MediaQuery.of(context).size.height / 2)));
-    circleSectorCoordinatesBloc.listen((state) => {
-          if (state is CircleSectorEndCoordinatesIdentifiedState)
-            print('state yielded is: ${state.sectorEndCoordinatesList}')
-        });
     Size windowSize = MediaQuery.of(context).size;
 
     double contentCardHeight = windowSize.height * 0.6;//width is decided by the page view in parallax card

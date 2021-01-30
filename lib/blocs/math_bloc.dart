@@ -16,6 +16,13 @@ class AngleConversionEvent extends MathBlocEvent {
 
 }
 
+class CoordinateInSectorIdentifierBlocEvent extends MathBlocEvent {
+  final List<Offset> sectorEndCoordinatesList;
+  final Offset coordinate;
+
+  CoordinateInSectorIdentifierBlocEvent({@required this.sectorEndCoordinatesList, @required this.coordinate});
+}
+
 class MathBloc extends Bloc<MathBlocEvent, MathBlocState> {
   MathBloc() : super(MathBlocInitialState());
 
@@ -41,6 +48,52 @@ class MathBloc extends Bloc<MathBlocEvent, MathBlocState> {
         default:
           yield MathBlocAngleConversionState(angle: angle);
       }
+    } else if(event is CoordinateInSectorIdentifierBlocEvent) {
+      List<Offset> sectorEndCoordinatesList = event.sectorEndCoordinatesList;
+      Offset coordinate = event.coordinate;
+
+      List<Offset> offsetAndCoordinateGivenDifferenceList = [];
+
+      for (Offset offset in sectorEndCoordinatesList) {
+
+        Offset difference = offset - coordinate;
+
+        offsetAndCoordinateGivenDifferenceList.add(difference);
+      }
+
+      List<Offset> offsetAndCoordinateGivenDifferenceUnsortedList = offsetAndCoordinateGivenDifferenceList.toList();
+
+      offsetAndCoordinateGivenDifferenceList.sort((Offset offset1, Offset offset2) {
+        if(offset1.dx.abs() == offset2.dx.abs() && offset1.dy.abs() == offset2.dy.abs()) {
+          return 0;
+        } else if(offset1.dx.abs() > offset2.dx.abs() && offset1.dy.abs() > offset2.dy.abs()) {
+          return 1;
+        } else if(offset1.dx.abs() < offset2.dx.abs() && offset1.dy.abs() < offset2.dy.abs()) {
+          return -1;
+        } else if(offset1.dx.abs() > offset2.dx.abs() && offset1.dy.abs() < offset2.dy.abs()) {
+          if((offset1.dx.abs() - offset2.dx.abs()) > (offset2.dy.abs() - offset1.dy.abs())) {
+            return 1;
+          } else {
+            return -1;
+          }
+        } else if(offset1.dx.abs() < offset2.dx.abs() && offset1.dy.abs() > offset2.dy.abs()) {
+          if((offset2.dx.abs() - offset1.dx.abs()) > (offset1.dy.abs() - offset2.dy.abs())) {
+            return -1;
+          } else {
+            return 1;
+          }
+        } else {
+          return 0;
+        }
+      });
+      print('sorted list is : $offsetAndCoordinateGivenDifferenceList');
+      print('unsorted is: $offsetAndCoordinateGivenDifferenceUnsortedList');
+      Offset sectorContainingCoordinateOffset = offsetAndCoordinateGivenDifferenceList.first;//the one with the least difference
+
+      int sectorContainingCoordinateIndex = offsetAndCoordinateGivenDifferenceUnsortedList.indexOf(sectorContainingCoordinateOffset);
+      print('sectorContainingCoordinateIndex: $sectorContainingCoordinateIndex');
+
+      yield MathBlocCoordinateInSectorIdentifierState(sectorContainingCoordinateIndex: sectorContainingCoordinateIndex);
     }
   }
 }
@@ -53,4 +106,10 @@ class MathBlocAngleConversionState extends MathBlocState {
   final double angle;
 
   MathBlocAngleConversionState({@required this.angle});
+}
+
+class MathBlocCoordinateInSectorIdentifierState extends MathBlocState {
+  final int sectorContainingCoordinateIndex;
+  MathBlocCoordinateInSectorIdentifierState({@required this.sectorContainingCoordinateIndex});
+
 }

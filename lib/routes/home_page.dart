@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:fayizali/providers/dart_provider.dart';
 import 'package:fayizali/providers/lever_provider.dart';
 import 'package:provider/provider.dart';
+import 'package:fayizali/blocs/circle_sector_coordinates_bloc.dart';
+import 'package:fayizali/blocs/math_bloc.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -23,6 +25,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       height: window.physicalSize.height,
     );
   }
+
+  MathBloc mathBloc;
+  CircleSectorCoordinatesBloc circleSectorCoordinatesBloc;
 
   @override
   void didChangeDependencies() async {
@@ -173,22 +178,46 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
+  List<Offset> sectorEndCoordinatesList;
+
   @override
   Widget build(BuildContext context) {
+    Size windowSize = Size(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height);
+
+    circleSectorCoordinatesBloc = Provider.of<CircleSectorCoordinatesBloc>(context, listen: false);
+    mathBloc = Provider.of<MathBloc>(context, listen: false);
+
+    circleSectorCoordinatesBloc.add(CircleSectorEndCoordinatesIdentifierEvent(radius: windowSize.height - (40 * 2), numberOfSectors: 20, center: Offset(windowSize.width / 2, windowSize.height / 2)));
+
+    circleSectorCoordinatesBloc.listen((state) {
+      if (state is CircleSectorEndCoordinatesIdentifiedState) {
+        sectorEndCoordinatesList = state.sectorEndCoordinatesList;
+        print('state yielded is: $sectorEndCoordinatesList');
+      }
+
+    });
+
     dartProvider = Provider.of<DartProvider>(context);
     leverProvider = Provider.of<LeverProvider>(context);
 
     return Scaffold(
-      body: Stack(children: <Widget>[
-        wallImage,
-        Align(alignment: Alignment.center, child: _renderBoard()),
-        _renderDart(),
-        Positioned(
-          right: 40, //TODO: Remove this hardcoding
-          bottom: 40, //TODO: Remove this hardcoding
-          child: _renderLever(),
-        )
-      ]),
+      body: GestureDetector(
+        onTapUp: (TapUpDetails tapUpDetails) {
+          Offset tapPosition = tapUpDetails.globalPosition;
+          print('tapped position is: $tapPosition');
+          mathBloc.add(CoordinateInSectorIdentifierBlocEvent(sectorEndCoordinatesList: sectorEndCoordinatesList, coordinate: tapPosition));
+        },
+        child: Stack(children: <Widget>[
+          wallImage,
+          Align(alignment: Alignment.center, child: _renderBoard()),
+          _renderDart(),
+          Positioned(
+            right: 40, //TODO: Remove this hardcoding
+            bottom: 40, //TODO: Remove this hardcoding
+            child: _renderLever(),
+          )
+        ]),
+      ),
     );
   }
 }

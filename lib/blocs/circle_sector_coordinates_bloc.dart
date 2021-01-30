@@ -65,10 +65,9 @@ class CircleSectorCoordinatesBloc
           sectorEndCoordinatesList.add(Offset(corX, corY));
         }
       }
+      yield CircleSectorEndCoordinatesIdentifiedState(
+          sectorEndCoordinatesList: sectorEndCoordinatesList);
     }
-
-    yield CircleSectorEndCoordinatesIdentifiedState(
-        sectorEndCoordinatesList: sectorEndCoordinatesList);
   }
 }
 
