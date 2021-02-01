@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:poly/poly.dart';
 
 enum AngleConversionType { radiansToDegrees, degreesToRadians }
 
@@ -19,8 +20,9 @@ class AngleConversionEvent extends MathBlocEvent {
 class CoordinateInSectorIdentifierBlocEvent extends MathBlocEvent {
   final List<Offset> sectorEndCoordinatesList;
   final Offset coordinate;
+  final Offset center;
 
-  CoordinateInSectorIdentifierBlocEvent({@required this.sectorEndCoordinatesList, @required this.coordinate});
+  CoordinateInSectorIdentifierBlocEvent({@required this.sectorEndCoordinatesList, @required this.coordinate, @required this.center});
 }
 
 class MathBloc extends Bloc<MathBlocEvent, MathBlocState> {
@@ -51,49 +53,79 @@ class MathBloc extends Bloc<MathBlocEvent, MathBlocState> {
     } else if(event is CoordinateInSectorIdentifierBlocEvent) {
       List<Offset> sectorEndCoordinatesList = event.sectorEndCoordinatesList;
       Offset coordinate = event.coordinate;
+      Offset center = event.center;
 
-      List<Offset> offsetAndCoordinateGivenDifferenceList = [];
+      List<math.Point<num>> polygonPointsList = [];
+      List<bool> sectorContainsPointList = [];
 
-      for (Offset offset in sectorEndCoordinatesList) {
+      for (var index = 0; index < sectorEndCoordinatesList.length; index++) {
+        Offset offset = sectorEndCoordinatesList[index];
 
-        Offset difference = offset - coordinate;
+        math.Point point = math.Point(offset.dx, offset.dy);
+        polygonPointsList.add(point);
 
-        offsetAndCoordinateGivenDifferenceList.add(difference);
+        if(index-1 != -1) {
+          List<math.Point> allPointsForTriangleList = [polygonPointsList[index-1], polygonPointsList[index], math.Point(center.dx, center.dy)];
+          Polygon triangle = Polygon(allPointsForTriangleList);
+          bool sectorContainsPoint = triangle.isPointInside(Point(coordinate.dx, coordinate.dy));
+          sectorContainsPointList.add(sectorContainsPoint);
+        }
       }
 
-      List<Offset> offsetAndCoordinateGivenDifferenceUnsortedList = offsetAndCoordinateGivenDifferenceList.toList();
+      print(sectorContainsPointList);
+      print(sectorContainsPointList.indexOf(true));
+      yield MathBlocCoordinateInSectorIdentifierState(sectorContainingCoordinateIndex: sectorContainsPointList.indexOf(true));
+      // List<Offset> offsetAndCoordinateGivenDifferenceList = [];
+      //
+      // for (Offset offset in sectorEndCoordinatesList) {
+      //
+      //   Offset difference = offset - coordinate;
+      //
+      //   offsetAndCoordinateGivenDifferenceList.add(difference);
+      // }
+      //
+      // List<Offset> offsetAndCoordinateGivenDifferenceUnsortedList = offsetAndCoordinateGivenDifferenceList.toList();
+      //
+      // offsetAndCoordinateGivenDifferenceList.sort((Offset offset1, Offset offset2) {
+      //   if(offset1.dx.abs() == offset2.dx.abs() && offset1.dy.abs() == offset2.dy.abs()) {
+      //     return 0;
+      //   } else if(offset1.dx.abs() > offset2.dx.abs() && offset1.dy.abs() > offset2.dy.abs()) {
+      //     return 1;
+      //   } else if(offset1.dx.abs() < offset2.dx.abs() && offset1.dy.abs() < offset2.dy.abs()) {
+      //     return -1;
+      //   } else if(offset1.dx.abs() > offset2.dx.abs() && offset1.dy.abs() < offset2.dy.abs()) {
+      //     if((offset1.dx.abs() - offset2.dx.abs()) > (offset2.dy.abs() - offset1.dy.abs())) {
+      //       return 1;
+      //     } else {
+      //       return -1;
+      //     }
+      //   } else if(offset1.dx.abs() < offset2.dx.abs() && offset1.dy.abs() > offset2.dy.abs()) {
+      //     if((offset2.dx.abs() - offset1.dx.abs()) > (offset1.dy.abs() - offset2.dy.abs())) {
+      //       return -1;
+      //     } else {
+      //       return 1;
+      //     }
+      //   } else {
+      //     return 0;
+      //   }
+      // });
+      // print('sorted list is : $offsetAndCoordinateGivenDifferenceList');
+      // print('unsorted is: $offsetAndCoordinateGivenDifferenceUnsortedList');
+      // List<Offset> offsetsNearestToCoordinateOffset = [offsetAndCoordinateGivenDifferenceList.first, offsetAndCoordinateGivenDifferenceList[2]];//the ones with the least differences
+      //
+      // int sectorContainingCoordinateIndex;
+      //
+      // if(offsetAndCoordinateGivenDifferenceUnsortedList.indexOf(offsetsNearestToCoordinateOffset[0]) < offsetAndCoordinateGivenDifferenceUnsortedList.indexOf(offsetsNearestToCoordinateOffset[1])) {
+      //   sectorContainingCoordinateIndex = offsetAndCoordinateGivenDifferenceUnsortedList.indexOf(offsetsNearestToCoordinateOffset[0]);
+      // } else {
+      //   sectorContainingCoordinateIndex = offsetAndCoordinateGivenDifferenceUnsortedList.indexOf(offsetsNearestToCoordinateOffset[1]);
+      // }
+      //
+      // sectorContainingCoordinateIndex = offsetAndCoordinateGivenDifferenceUnsortedList.indexOf(offsetsNearestToCoordinateOffset[0]);
+      //
+      // print('sectorContainingCoordinateIndex: $sectorContainingCoordinateIndex & second index is ${offsetAndCoordinateGivenDifferenceUnsortedList.indexOf(offsetsNearestToCoordinateOffset[1])}');
 
-      offsetAndCoordinateGivenDifferenceList.sort((Offset offset1, Offset offset2) {
-        if(offset1.dx.abs() == offset2.dx.abs() && offset1.dy.abs() == offset2.dy.abs()) {
-          return 0;
-        } else if(offset1.dx.abs() > offset2.dx.abs() && offset1.dy.abs() > offset2.dy.abs()) {
-          return 1;
-        } else if(offset1.dx.abs() < offset2.dx.abs() && offset1.dy.abs() < offset2.dy.abs()) {
-          return -1;
-        } else if(offset1.dx.abs() > offset2.dx.abs() && offset1.dy.abs() < offset2.dy.abs()) {
-          if((offset1.dx.abs() - offset2.dx.abs()) > (offset2.dy.abs() - offset1.dy.abs())) {
-            return 1;
-          } else {
-            return -1;
-          }
-        } else if(offset1.dx.abs() < offset2.dx.abs() && offset1.dy.abs() > offset2.dy.abs()) {
-          if((offset2.dx.abs() - offset1.dx.abs()) > (offset1.dy.abs() - offset2.dy.abs())) {
-            return -1;
-          } else {
-            return 1;
-          }
-        } else {
-          return 0;
-        }
-      });
-      print('sorted list is : $offsetAndCoordinateGivenDifferenceList');
-      print('unsorted is: $offsetAndCoordinateGivenDifferenceUnsortedList');
-      Offset sectorContainingCoordinateOffset = offsetAndCoordinateGivenDifferenceList.first;//the one with the least difference
-
-      int sectorContainingCoordinateIndex = offsetAndCoordinateGivenDifferenceUnsortedList.indexOf(sectorContainingCoordinateOffset);
-      print('sectorContainingCoordinateIndex: $sectorContainingCoordinateIndex');
-
-      yield MathBlocCoordinateInSectorIdentifierState(sectorContainingCoordinateIndex: sectorContainingCoordinateIndex);
+      // yield MathBlocCoordinateInSectorIdentifierState(sectorContainingCoordinateIndex: sectorContainingCoordinateIndex);
     }
   }
 }

@@ -1,10 +1,12 @@
 import 'dart:ui';
-import 'package:flutter/material.dart';
-import 'package:fayizali/providers/dart_provider.dart';
-import 'package:fayizali/providers/lever_provider.dart';
-import 'package:provider/provider.dart';
+
 import 'package:fayizali/blocs/circle_sector_coordinates_bloc.dart';
 import 'package:fayizali/blocs/math_bloc.dart';
+import 'package:fayizali/providers/dart_provider.dart';
+import 'package:fayizali/providers/lever_provider.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:provider/provider.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -53,8 +55,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void prepareAnimations() {
     dartBoardAnimationController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 6000))
-          ..forward();
+    AnimationController(vsync: this, duration: Duration(milliseconds: 6000))
+      ..forward();
 
     dartBoardSlideAnimation = Tween(begin: -5.0, end: 0.0).animate(
         CurvedAnimation(
@@ -131,8 +133,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             child: child,
           );
         },
-        child: Image.asset(
-          'assets/dart_board.png',
+        child: Transform.rotate(
+          angle: 1.97,
+          child: Image.asset(
+            'assets/dart_board.png',
+          ),
         ),
       ),
     );
@@ -143,7 +148,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       position: leverDartSlideAnimation,
       child: Container(
         key: leverKey,
-        width: 50.0, //TODO: Remove this hardcoding
+        width: 50.0,
+        //TODO: Remove this hardcoding
         height: MediaQuery.of(context).size.height / 2.5,
         alignment: Alignment.bottomCenter,
         decoration: BoxDecoration(
@@ -182,19 +188,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    Size windowSize = Size(MediaQuery.of(context).size.width, MediaQuery.of(context).size.height);
-
-    circleSectorCoordinatesBloc = Provider.of<CircleSectorCoordinatesBloc>(context, listen: false);
+    Size windowSize = Size(
+        MediaQuery.of(context).size.width, MediaQuery.of(context).size.height);
+    print(MediaQuery.of(context).size.width);
+    circleSectorCoordinatesBloc =
+        Provider.of<CircleSectorCoordinatesBloc>(context, listen: false);
     mathBloc = Provider.of<MathBloc>(context, listen: false);
 
-    circleSectorCoordinatesBloc.add(CircleSectorEndCoordinatesIdentifierEvent(radius: windowSize.height - (40 * 2), numberOfSectors: 20, center: Offset(windowSize.width / 2, windowSize.height / 2)));
+    circleSectorCoordinatesBloc.add(CircleSectorEndCoordinatesIdentifierEvent(
+        radius: (windowSize.height - 250) /2,
+        numberOfSectors: 20,
+        center: Offset(windowSize.width / 2 - 10, windowSize.height / 2 - 10)));
 
     circleSectorCoordinatesBloc.listen((state) {
       if (state is CircleSectorEndCoordinatesIdentifiedState) {
         sectorEndCoordinatesList = state.sectorEndCoordinatesList;
         print('state yielded is: $sectorEndCoordinatesList');
       }
-
     });
 
     dartProvider = Provider.of<DartProvider>(context);
@@ -205,7 +215,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         onTapUp: (TapUpDetails tapUpDetails) {
           Offset tapPosition = tapUpDetails.globalPosition;
           print('tapped position is: $tapPosition');
-          mathBloc.add(CoordinateInSectorIdentifierBlocEvent(sectorEndCoordinatesList: sectorEndCoordinatesList, coordinate: tapPosition));
+          mathBloc.add(
+              CoordinateInSectorIdentifierBlocEvent(
+                sectorEndCoordinatesList: sectorEndCoordinatesList,
+                coordinate: tapPosition,
+                center: Offset(windowSize.width / 2, windowSize.height / 2)
+              )
+          );
         },
         child: Stack(children: <Widget>[
           wallImage,
@@ -215,7 +231,30 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             right: 40, //TODO: Remove this hardcoding
             bottom: 40, //TODO: Remove this hardcoding
             child: _renderLever(),
-          )
+          ),
+          BlocBuilder<CircleSectorCoordinatesBloc,
+              CircleSectorCoordinatesState>(builder: (context, state) {
+            if (state is CircleSectorEndCoordinatesIdentifiedState) {
+              return Stack(
+                alignment: Alignment.center,
+                children:
+              state.sectorEndCoordinatesList
+                  .map<Widget>((e) => Positioned(
+                left: e.dx - 10,
+                top: e.dy - 10,
+                child: Container(
+                  width: 20,
+                  height: 20,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.yellow),
+                  child: Text(state.sectorEndCoordinatesList.indexOf(e).toString()),
+                ),
+              )).toList()
+              );
+            } else {
+              return Text('Not found');
+            }
+          })
         ]),
       ),
     );
