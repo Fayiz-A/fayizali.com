@@ -57,6 +57,7 @@ class MathBloc extends Bloc<MathBlocEvent, MathBlocState> {
 
       List<math.Point<num>> polygonPointsList = [];
       List<bool> sectorContainsPointList = [];
+      sectorEndCoordinatesList.add(sectorEndCoordinatesList.first);
 
       for (var index = 0; index < sectorEndCoordinatesList.length; index++) {
         Offset offset = sectorEndCoordinatesList[index];
@@ -72,7 +73,6 @@ class MathBloc extends Bloc<MathBlocEvent, MathBlocState> {
         }
       }
 
-      print(sectorContainsPointList);
       print(sectorContainsPointList.indexOf(true));
       yield MathBlocCoordinateInSectorIdentifierState(sectorContainingCoordinateIndex: sectorContainsPointList.indexOf(true));
       // List<Offset> offsetAndCoordinateGivenDifferenceList = [];

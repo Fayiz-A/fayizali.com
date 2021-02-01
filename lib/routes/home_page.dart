@@ -29,12 +29,39 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   MathBloc mathBloc;
-  CircleSectorCoordinatesBloc circleSectorCoordinatesBloc;
+  List<Offset> sectorEndCoordinatesList;
 
   @override
   void didChangeDependencies() async {
     await loadWallImage();
+
+    callDartBoardSectorCoordinatesBloc();
+
+    mathBloc = Provider.of<MathBloc>(context, listen: false);
+
     super.didChangeDependencies();
+  }
+
+  void callDartBoardSectorCoordinatesBloc() async {
+
+    Size windowSize = Size(
+        MediaQuery.of(context).size.width, MediaQuery.of(context).size.height);
+
+    CircleSectorCoordinatesBloc circleSectorCoordinatesBloc =
+    Provider.of<CircleSectorCoordinatesBloc>(context, listen: false);
+
+
+    circleSectorCoordinatesBloc.add(CircleSectorEndCoordinatesIdentifierEvent(
+        radius: (windowSize.height - 250) / 2,
+        numberOfSectors: 20,
+        center: Offset(windowSize.width / 2, windowSize.height / 2)));
+
+    await for(CircleSectorCoordinatesState state in circleSectorCoordinatesBloc) {
+      if (state is CircleSectorEndCoordinatesIdentifiedState) {
+        sectorEndCoordinatesList = state.sectorEndCoordinatesList;
+
+      }
+    }
   }
 
   @override
@@ -70,7 +97,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 curve: Interval(0.55, 0.75, curve: Curves.elasticOut)));
 
     dartAnimationController =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 400));
+    AnimationController(vsync: this, duration: Duration(milliseconds: 400))
+      ..addStatusListener((status) {
+        print('Status is: $status');
+        if (status == AnimationStatus.completed) {
+          mathBloc.add(CoordinateInSectorIdentifierBlocEvent(
+              sectorEndCoordinatesList: sectorEndCoordinatesList,
+              coordinate: dartProvider.dragPosition,
+              center: Offset(MediaQuery.of(context).size.width / 2,
+                  MediaQuery.of(context).size.height / 2)));
+        }
+      });
   }
 
   void _onDartDragged(DragUpdateDetails details) {
@@ -134,7 +171,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           );
         },
         child: Transform.rotate(
-          angle: 1.97,
+          angle: 2.02,
           child: Image.asset(
             'assets/dart_board.png',
           ),
@@ -184,79 +221,49 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  List<Offset> sectorEndCoordinatesList;
-
   @override
   Widget build(BuildContext context) {
-    Size windowSize = Size(
-        MediaQuery.of(context).size.width, MediaQuery.of(context).size.height);
-    print(MediaQuery.of(context).size.width);
-    circleSectorCoordinatesBloc =
-        Provider.of<CircleSectorCoordinatesBloc>(context, listen: false);
-    mathBloc = Provider.of<MathBloc>(context, listen: false);
-
-    circleSectorCoordinatesBloc.add(CircleSectorEndCoordinatesIdentifierEvent(
-        radius: (windowSize.height - 250) /2,
-        numberOfSectors: 20,
-        center: Offset(windowSize.width / 2 - 10, windowSize.height / 2 - 10)));
-
-    circleSectorCoordinatesBloc.listen((state) {
-      if (state is CircleSectorEndCoordinatesIdentifiedState) {
-        sectorEndCoordinatesList = state.sectorEndCoordinatesList;
-        print('state yielded is: $sectorEndCoordinatesList');
-      }
-    });
 
     dartProvider = Provider.of<DartProvider>(context);
     leverProvider = Provider.of<LeverProvider>(context);
 
     return Scaffold(
-      body: GestureDetector(
-        onTapUp: (TapUpDetails tapUpDetails) {
-          Offset tapPosition = tapUpDetails.globalPosition;
-          print('tapped position is: $tapPosition');
-          mathBloc.add(
-              CoordinateInSectorIdentifierBlocEvent(
-                sectorEndCoordinatesList: sectorEndCoordinatesList,
-                coordinate: tapPosition,
-                center: Offset(windowSize.width / 2, windowSize.height / 2)
-              )
-          );
-        },
-        child: Stack(children: <Widget>[
-          wallImage,
-          Align(alignment: Alignment.center, child: _renderBoard()),
-          _renderDart(),
-          Positioned(
-            right: 40, //TODO: Remove this hardcoding
-            bottom: 40, //TODO: Remove this hardcoding
-            child: _renderLever(),
-          ),
-          BlocBuilder<CircleSectorCoordinatesBloc,
-              CircleSectorCoordinatesState>(builder: (context, state) {
-            if (state is CircleSectorEndCoordinatesIdentifiedState) {
-              return Stack(
-                alignment: Alignment.center,
-                children:
-              state.sectorEndCoordinatesList
-                  .map<Widget>((e) => Positioned(
-                left: e.dx - 10,
-                top: e.dy - 10,
-                child: Container(
-                  width: 20,
-                  height: 20,
-                  alignment: Alignment.center,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: Colors.yellow),
-                  child: Text(state.sectorEndCoordinatesList.indexOf(e).toString()),
-                ),
-              )).toList()
-              );
-            } else {
-              return Text('Not found');
-            }
-          })
-        ]),
-      ),
+      body: Stack(children: <Widget>[
+        wallImage,
+        Align(alignment: Alignment.center, child: _renderBoard()),
+        _renderDart(),
+        Positioned(
+          right: 40, //TODO: Remove this hardcoding
+          bottom: 40, //TODO: Remove this hardcoding
+          child: _renderLever(),
+        ),
+        //TODO: Remove the widget below as it is only for testing
+        BlocBuilder<CircleSectorCoordinatesBloc, CircleSectorCoordinatesState>(
+            builder: (context, state) {
+              if (state is CircleSectorEndCoordinatesIdentifiedState) {
+                return Stack(
+                    alignment: Alignment.center,
+                    children: state.sectorEndCoordinatesList
+                        .map<Widget>((e) => Positioned(
+                      left: e.dx - 10,
+                      top: e.dy - 10,
+                      child: Container(
+                        width: 20,
+                        height: 20,
+                        alignment: Alignment.center,
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle, color: Colors.yellow),
+                        child: Text(state.sectorEndCoordinatesList
+                            .indexOf(e)
+                            .toString()),
+                      ),
+                    ))
+                        .toList());
+              } else {
+                return Container();
+              }
+            })
+      ]),
     );
   }
 }
