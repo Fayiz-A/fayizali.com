@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:fayizali/constants.dart' as constants;
+
 import 'package:fayizali/blocs/circle_sector_coordinates_bloc.dart';
 import 'package:fayizali/blocs/math_bloc.dart';
 import 'package:fayizali/providers/dart_provider.dart';
@@ -40,6 +42,28 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     mathBloc = Provider.of<MathBloc>(context, listen: false);
 
     super.didChangeDependencies();
+  }
+
+  captureSectorIndexFromMathBlocAndNavigate() async {
+    await for (MathBlocState state in mathBloc) {
+      if(state is MathBlocCoordinateInSectorIdentifierState) {
+
+        Object route = constants.routesListAccordingToDartBoard[state.sectorContainingCoordinateIndex];
+
+        if(route != null) {
+          Navigator.push(context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) => route
+              )
+          );
+        } else {
+          throw Exception('Route has not been yet defined in the constants file with index ${state.sectorContainingCoordinateIndex}');
+        }
+
+      } else {
+        print('Unknown state was emitted');
+      }
+    }
   }
 
   void callDartBoardSectorCoordinatesBloc() async {
@@ -106,6 +130,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               coordinate: dartProvider.dragPosition,
               center: Offset(MediaQuery.of(context).size.width / 2,
                   MediaQuery.of(context).size.height / 2)));
+          captureSectorIndexFromMathBlocAndNavigate();
         }
       });
   }
@@ -143,9 +168,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     DartProvider dartProvider = Provider.of<DartProvider>(context);
     Offset offset = dartProvider.dragPosition;
     double scaleValue = dartProvider.scaleValue;
+
     return Positioned(
-        left: offset.dx,
-        top: offset.dy,
+        left: offset.dx - ((MediaQuery.of(context).size.width * 0.02) / 2),
+        top: offset.dy - ((MediaQuery.of(context).size.height * 0.02) / 2),
         child: GestureDetector(
           onPanUpdate: _onDartDragged,
           child: ScaleTransition(
@@ -170,7 +196,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             child: child,
           );
         },
-        child: Transform.rotate(
+        child: Transform.rotate(//Just to make the sector ends configurable
           angle: 2.02,
           child: Image.asset(
             'assets/dart_board.png',
