@@ -3,7 +3,7 @@ import 'dart:ui';
 import 'package:fayizali/blocs/circle_sector_coordinates_bloc.dart';
 import 'package:fayizali/blocs/math_bloc.dart';
 import 'package:fayizali/blocs/url_bloc.dart';
-import 'package:fayizali/routes/parallax_card.dart';
+import 'package:fayizali/widgets/parallax_card.dart';
 import 'package:fayizali/widgets/arc_frame_painter.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
