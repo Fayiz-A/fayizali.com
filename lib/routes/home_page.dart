@@ -48,18 +48,33 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     await for (MathBlocState state in mathBloc) {
       if(state is MathBlocCoordinateInSectorIdentifierState) {
 
-        Object route = constants.routesListAccordingToDartBoard[state.sectorContainingCoordinateIndex];
+        if(state.sectorContainingCoordinateIndex == -1) {
+          //TODO: implement the logic for resetting everything
 
-        if(route != null) {
-          Navigator.push(context,
-              MaterialPageRoute(
-                  builder: (BuildContext context) => route
-              )
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Row(
+                  children: <Widget>[
+                    Icon(Icons.fast_rewind),
+                    Text('Please hit the dart inside the dartboard'),
+                  ]
+                )
+            )
           );
         } else {
-          throw Exception('Route has not been yet defined in the constants file with index ${state.sectorContainingCoordinateIndex}');
-        }
+          var route = constants.routesListAccordingToDartBoard[state.sectorContainingCoordinateIndex];
 
+          if (route == null) {
+            throw Exception('Route name not found');
+          } else {
+            //everything is alright
+            Navigator.push(context,
+                MaterialPageRoute(
+                    builder: (BuildContext context) => route
+                )
+            );
+          }
+        }
       } else {
         print('Unknown state was emitted');
       }
