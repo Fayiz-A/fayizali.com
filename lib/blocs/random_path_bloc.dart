@@ -27,10 +27,10 @@ class RandomPathBloc extends Bloc<RandomPathEvent, RandomPathState> {
       if(state is RandomPathInitialState) {
         Size windowSize = event.windowSize;
 
-        List<Path> pathList;
+        List<Path> pathList = [];
         
         for(int pathIndex = 0; pathIndex<event.numberOfPaths; pathIndex++) {
-          math.Random random = math.Random(0);
+          math.Random random = math.Random();
 
           double randomX = random.nextDouble();
           double randomXInReasonableRange = _mapValueFromOneRangeToAnother(value: randomX, range1Min: 0.0,  range1Max: 1.0, range2Min: 0.0, range2Max: windowSize.width );
@@ -38,16 +38,21 @@ class RandomPathBloc extends Bloc<RandomPathEvent, RandomPathState> {
           double randomY = random.nextDouble();
           double randomYInReasonableRange = _mapValueFromOneRangeToAnother(value: randomY, range1Min: 0.0,  range1Max: 1.0, range2Min: windowSize.height, range2Max: windowSize.height * 2 );
 
+          double randomLineEndX = random.nextDouble();
+          double randomLineEndXInReasonableRange = _mapValueFromOneRangeToAnother(value: randomLineEndX, range1Min: 0.0,  range1Max: 1.0, range2Min: 0.0, range2Max: windowSize.width );
+
+          double randomLineEndY = random.nextDouble();
+          double randomLineEndYInReasonableRange = _mapValueFromOneRangeToAnother(value: randomLineEndY, range1Min: 0.0,  range1Max: 1.0, range2Min: 0.0, range2Max: 200 );
+
           Path path = Path()
             ..moveTo(randomXInReasonableRange, randomYInReasonableRange)
-            ..lineTo(0, 0);
+            ..lineTo(randomLineEndXInReasonableRange, randomLineEndYInReasonableRange)
+            ..close();
           pathList.add(path);
         }
         
         yield RandomPathGeneratedState(pathList: pathList);
 
-      } else {
-        print('second time');
       }
     } else {
       yield RandomPathInitialState();
@@ -56,8 +61,8 @@ class RandomPathBloc extends Bloc<RandomPathEvent, RandomPathState> {
 
   double _mapValueFromOneRangeToAnother({@required value, @required range1Min, @required range1Max, @required range2Min, @required range2Max}) {
     double oldRange = range1Max - range1Min;
-    double newRange = range2Min - range2Max;
-    double newValue = (((value - range1Min) * newRange) / oldRange) + range2Min;
+    double newRange = range2Max - range2Min;
+    double newValue = (((value - range1Min) / oldRange) * newRange) + range2Min;
     
     return newValue;
   }
