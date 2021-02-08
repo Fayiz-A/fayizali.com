@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'dart:ui';
 
 import 'package:fayizali/blocs/random_path_bloc.dart';
@@ -11,7 +10,8 @@ class GeneralInfoPage extends StatefulWidget {
   _GeneralInfoPageState createState() => _GeneralInfoPageState();
 }
 
-class _GeneralInfoPageState extends State<GeneralInfoPage> with SingleTickerProviderStateMixin {
+class _GeneralInfoPageState extends State<GeneralInfoPage>
+    with SingleTickerProviderStateMixin {
   AnimationController _bubbleOffsetController;
 
   List<Path> _pathList = [];
@@ -21,16 +21,18 @@ class _GeneralInfoPageState extends State<GeneralInfoPage> with SingleTickerProv
   void initState() {
     super.initState();
     _bubbleOffsetController = AnimationController(
-        vsync: this,
-        duration: Duration(milliseconds: 5000),
+      vsync: this,
+      duration: Duration(milliseconds: 5000),
     )
-      ..forward()
+      // ..forward()
       ..addListener(() {
-        if(_bubbleOffsetController.value == 1.0 && _pathList.isNotEmpty && randomPathBloc != null) {
-
-          randomPathBloc.add(PathRelatedToPreviousPathsGeneratorEvent(windowSize: MediaQuery.of(context).size, numberOfPaths: 20, pathList: _pathList));
-          _bubbleOffsetController.forward(from: 0.0);
-
+        if (_bubbleOffsetController.value == 1.0 &&
+            _pathList.isNotEmpty &&
+            randomPathBloc != null) {
+          randomPathBloc.add(PathRelatedToPreviousPathsGeneratorEvent(
+              windowSize: MediaQuery.of(context).size,
+              numberOfPaths: 20,
+              pathList: _pathList));
         }
       });
   }
@@ -40,7 +42,6 @@ class _GeneralInfoPageState extends State<GeneralInfoPage> with SingleTickerProv
     getAllPathsFromBloc();
 
     super.didChangeDependencies();
-
   }
 
   @override
@@ -51,55 +52,55 @@ class _GeneralInfoPageState extends State<GeneralInfoPage> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _bubbleOffsetController,
-      // child:
-      builder: (BuildContext context, Widget child) {
-        return BlocBuilder<RandomPathBloc, RandomPathState>(
+    return BlocBuilder<RandomPathBloc, RandomPathState>(
+        builder: (BuildContext context, RandomPathState state) {
+          if (state is RandomPathGeneratedState) {
+            _bubbleOffsetController.forward(from: 0.0);
 
-            builder: (BuildContext context, RandomPathState state) {
-              if(state is RandomPathGeneratedState) {
+            return AnimatedBuilder(
+              animation: _bubbleOffsetController,
+              builder: (BuildContext context, Widget child) {
                 List<Path> pathList = state.pathList;
-                _pathList = pathList;//for global access to this path list
+                _pathList = pathList; //for global access to this path list
                 double animValue = _bubbleOffsetController.value;
                 return Stack(
-                  children: [
-                    for(int index = 0; index<20; index++)
-                      Positioned(
-                        left: _getPathCurveDetails(path: pathList[index], animValue: animValue).dx,
-                        top: _getPathCurveDetails(path: pathList[index], animValue: animValue).dy,
+                    children: pathList.map((path) {
+                      return Positioned(
+                        left: _getPathCurveDetails(path: path, animValue: animValue).dx,
+                        top: _getPathCurveDetails(path: path, animValue: animValue).dy,
                         child: Container(
                           width: 70,
                           height: 70,
                           decoration: BoxDecoration(
+                            border: Border.all(color: Colors.red, width: 2.0),
                             shape: BoxShape.circle,
                             color: Colors.redAccent.withOpacity(0.4),
                           ),
                         ),
-                      )
-                  ],
-                );
-              } else {
-                return Text('Unknown State');
-              }
-            }
-        );
-      },
-    );
+                      );
+                    }).toList());
+              },
+            );
+          } else {
+            return Text('Unknown State');
+          }
+        });
   }
 
   void getAllPathsFromBloc() {
     randomPathBloc = Provider.of<RandomPathBloc>(context, listen: false);
 
-    randomPathBloc.add(RandomPathGeneratorEvent(windowSize: MediaQuery.of(context).size, numberOfPaths: 20));
-
+    randomPathBloc.add(RandomPathGeneratorEvent(
+        windowSize: MediaQuery.of(context).size, numberOfPaths: 20));
   }
 
-  Offset _getPathCurveDetails({ @required Path path, @required double animValue}) {
+  Offset _getPathCurveDetails(
+      {@required Path path, @required double animValue}) {
     PathMetrics pathMetrics = path.computeMetrics();
     PathMetric pathMetric = pathMetrics.elementAt(0);
     double valueToTranslateTo = pathMetric.length * animValue;
-    Tangent positionDetailsForBubble = pathMetric.getTangentForOffset(valueToTranslateTo);
+    Tangent positionDetailsForBubble =
+    pathMetric.getTangentForOffset(valueToTranslateTo);
     return positionDetailsForBubble.position;
   }
 }

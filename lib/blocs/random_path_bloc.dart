@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:fraction/fraction.dart';
 
 abstract class RandomPathEvent {}
 
@@ -120,10 +121,13 @@ class RandomPathBloc extends Bloc<RandomPathEvent, RandomPathState> {
               range2Min: -(windowSize.height / 10),
               range2Max: -(windowSize.height / 2));
 
+          Fraction previousPathExtendedEndOffsetXInvertedFraction = Fraction.fromDouble((math.tan(previousPathEndOffset.direction)) / randomLineEndYInReasonableRange);
+          previousPathExtendedEndOffsetXInvertedFraction.inverse();
+          double previousPathExtendedEndOffsetXDouble = previousPathExtendedEndOffsetXInvertedFraction.toDouble().abs();
 
           path = Path()
               ..moveTo(previousPathEndOffset.dx, previousPathEndOffset.dy)
-              ..lineTo(randomLineEndXInReasonableRange, randomLineEndYInReasonableRange);
+              ..lineTo(previousPathExtendedEndOffsetXDouble, randomLineEndYInReasonableRange);
               // ..close();
         } else {
           double randomYInReasonableRange = _mapValueFromOneRangeToAnother(
