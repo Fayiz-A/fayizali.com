@@ -5,6 +5,7 @@ import 'package:fayizali/blocs/random_path_bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
+import 'package:fayizali/constants.dart' as constants;
 
 class CustomAnimatedBubble extends StatefulWidget {
   final int index;
@@ -51,6 +52,8 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
     super.dispose();
   }
 
+  double _bubbleOpacity = 1.0;
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<RandomPathBloc, RandomPathState>(
@@ -65,17 +68,23 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
         _bubbleOffsetController.forward();
         return AnimatedBuilder(
           animation: _bubbleOffsetController,
-          child: Container(
-              width: 200,
-              height: 200,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.red, width: 2.0),
-                shape: BoxShape.circle,
-                color: Colors.redAccent.withOpacity(0.4),
-              ),
-              child: Center(
-                child: Text('${widget.index}'),
-              )),
+          child: GestureDetector(
+            onTap: _onBubbleTapped,
+            child: Opacity(
+              opacity: _bubbleOpacity,
+              child: Container(
+                  width: 200,
+                  height: 200,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.red, width: 2.0),
+                    shape: BoxShape.circle,
+                    color: Colors.redAccent.withOpacity(0.4),
+                  ),
+                  child: Center(
+                    child: Text('${widget.index}'),
+                  )),
+            ),
+          ),
           builder: (BuildContext context, Widget child) {
             Path path = state.path;
             double animValue = _bubbleOffsetController.value;
@@ -111,6 +120,13 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
     return positionDetailsForBubble.position;
   }
 
+  void _onBubbleTapped() {
+    _bubbleOffsetController.stop();
+    setState(() {
+      _bubbleOpacity = 0.0;
+    });
+  }
+
   void _generateRandomPathForBubble({@required int index}) {
     RandomPathBloc randomPathBloc =
         Provider.of<RandomPathBloc>(context, listen: false);
@@ -121,8 +137,8 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
 
   Duration _generateRandomDurationInMS() {
     math.Random random = math.Random();
-    int minMilliSeconds = 2000;
-    int maxMilliSeconds = 5000;
+    int minMilliSeconds = constants.bubbleAnimationMinDurationInMS;
+    int maxMilliSeconds = constants.bubbleAnimationMaxDurationInMS;
     int randomMilliSeconds =
         random.nextInt(maxMilliSeconds - minMilliSeconds) + minMilliSeconds;
     return Duration(milliseconds: randomMilliSeconds);

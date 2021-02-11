@@ -26,3 +26,6 @@ List<Object> routesListAccordingToDartBoard = [
   GeneralInfoPage(),
   ComputerLanguagesPage(),
 ];
+
+int bubbleAnimationMinDurationInMS = 2000;
+int bubbleAnimationMaxDurationInMS = 5000;
