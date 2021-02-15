@@ -1,11 +1,12 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:fayizali/blocs/bubble_touch_bloc.dart';
 import 'package:fayizali/blocs/random_path_bloc.dart';
+import 'package:fayizali/constants.dart' as constants;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
-import 'package:fayizali/constants.dart' as constants;
 
 class CustomAnimatedBubble extends StatefulWidget {
   final int index;
@@ -52,60 +53,61 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
     super.dispose();
   }
 
-  double _bubbleOpacity = 1.0;
-
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<RandomPathBloc, RandomPathState>(
-        buildWhen: (previousState, state) {
-      if (state is RandomPathGeneratedState && state.index == widget.index) {
-        return true;
-      } else {
-        return false;
+    return BlocBuilder<BubbleTouchBloc, BubbleTouchState>(
+      builder: (context, bubbleTouchState) {
+        if(bubbleTouchState is BubbleClickedState) _bubbleOffsetController.stop(canceled: false);
+
+        return BlocBuilder<RandomPathBloc, RandomPathState>(
+            buildWhen: (previousState, state) {
+              if (state is RandomPathGeneratedState && state.index == widget.index) {
+                return true;
+              } else {
+                return false;
+              }
+            }, builder: (BuildContext context, RandomPathState state) {
+          if (state is RandomPathGeneratedState) {
+            if(bubbleTouchState is! BubbleClickedState) _bubbleOffsetController.forward();
+            return AnimatedBuilder(
+              animation: _bubbleOffsetController,
+              child: GestureDetector(
+                onTapUp: _onBubbleTapped,
+                child: Container(
+                    width: 200,
+                    height: 200,
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.red, width: 2.0),
+                      shape: BoxShape.circle,
+                      color: Colors.redAccent.withOpacity(0.4),
+                    ),
+                    child: Center(
+                      child: Text('${widget.index}'),
+                    )),
+              ),
+              builder: (BuildContext context, Widget child) {
+                Path path = state.path;
+                double animValue = _bubbleOffsetController.value;
+                return Stack(children: [
+                  Positioned(
+                      left: _getPathCurveDetails(
+                        path: path,
+                        animValue: animValue,
+                      ).dx,
+                      top: _getPathCurveDetails(
+                        path: path,
+                        animValue: animValue,
+                      ).dy,
+                      child: child)
+                ]);
+              },
+            );
+          } else {
+            return Text('Unknown State');
+          }
+        });
       }
-    }, builder: (BuildContext context, RandomPathState state) {
-      if (state is RandomPathGeneratedState) {
-        _bubbleOffsetController.forward();
-        return AnimatedBuilder(
-          animation: _bubbleOffsetController,
-          child: GestureDetector(
-            onTap: _onBubbleTapped,
-            child: Opacity(
-              opacity: _bubbleOpacity,
-              child: Container(
-                  width: 200,
-                  height: 200,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.red, width: 2.0),
-                    shape: BoxShape.circle,
-                    color: Colors.redAccent.withOpacity(0.4),
-                  ),
-                  child: Center(
-                    child: Text('${widget.index}'),
-                  )),
-            ),
-          ),
-          builder: (BuildContext context, Widget child) {
-            Path path = state.path;
-            double animValue = _bubbleOffsetController.value;
-            return Stack(children: [
-              Positioned(
-                  left: _getPathCurveDetails(
-                    path: path,
-                    animValue: animValue,
-                  ).dx,
-                  top: _getPathCurveDetails(
-                    path: path,
-                    animValue: animValue,
-                  ).dy,
-                  child: child)
-            ]);
-          },
-        );
-      } else {
-        return Text('Unknown State');
-      }
-    });
+    );
   }
 
   Offset _getPathCurveDetails({
@@ -116,20 +118,23 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
     PathMetric pathMetric = pathMetrics.elementAt(0);
     double valueToTranslateTo = pathMetric.length * animValue;
     Tangent positionDetailsForBubble =
-        pathMetric.getTangentForOffset(valueToTranslateTo);
+    pathMetric.getTangentForOffset(valueToTranslateTo);
     return positionDetailsForBubble.position;
   }
 
-  void _onBubbleTapped() {
+  void _onBubbleTapped(TapUpDetails tapUpDetails) {
     _bubbleOffsetController.stop();
-    setState(() {
-      _bubbleOpacity = 0.0;
-    });
+    print('Stopped');
+    BubbleTouchBloc bubbleTouchBloc =
+    Provider.of<BubbleTouchBloc>(context, listen: false);
+
+    bubbleTouchBloc
+        .add(BubbleClickedEvent(touchOffset: tapUpDetails.globalPosition));
   }
 
   void _generateRandomPathForBubble({@required int index}) {
     RandomPathBloc randomPathBloc =
-        Provider.of<RandomPathBloc>(context, listen: false);
+    Provider.of<RandomPathBloc>(context, listen: false);
 
     randomPathBloc.add(RandomPathGeneratorEvent(
         windowSize: MediaQuery.of(context).size, index: index));

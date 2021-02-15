@@ -1,3 +1,4 @@
+import 'package:fayizali/blocs/bubble_touch_bloc.dart';
 import 'package:fayizali/blocs/circle_sector_coordinates_bloc.dart';
 import 'package:fayizali/blocs/math_bloc.dart';
 import 'package:fayizali/blocs/random_path_bloc.dart';
@@ -23,6 +24,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => UrlBloc()),
         BlocProvider(create: (_) => MathBloc()),
         BlocProvider(create: (_) => CircleSectorCoordinatesBloc()),
+        BlocProvider(create: (_) => BubbleTouchBloc()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
