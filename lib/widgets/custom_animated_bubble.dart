@@ -18,8 +18,11 @@ class CustomAnimatedBubble extends StatefulWidget {
 }
 
 class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   AnimationController _bubbleOffsetController;
+  AnimationController _bubbleInformationTextController;
+
+  Animation<Offset> _bubbleInformationTextSlideAnimation;
 
   @override
   void initState() {
@@ -39,6 +42,21 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
         }
       })
       ..forward();
+
+    _bubbleInformationTextController = AnimationController(
+        vsync: this,
+        duration: Duration(seconds: constants.bubbleStopDurationInMS)
+    );
+
+    _bubbleInformationTextSlideAnimation = Tween<Offset>(
+      begin: Offset.zero,
+      end: Offset(0, 1000)
+    ).animate(
+        CurvedAnimation(
+            parent: _bubbleInformationTextController,
+            curve: Curves.linear
+        )
+    );
   }
 
   @override
@@ -50,14 +68,17 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
   @override
   void dispose() {
     _bubbleOffsetController.dispose();
+    _bubbleInformationTextController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<BubbleTouchBloc, BubbleTouchState>(
-      builder: (context, bubbleTouchState) {
-        if(bubbleTouchState is BubbleClickedState) _bubbleOffsetController.stop(canceled: false);
+        builder: (context, bubbleTouchState) {
+        if(bubbleTouchState is BubbleClickedState) {
+          _bubbleOffsetController.stop(canceled: false);
+        } else if(bubbleTouchState is BubbleResumeState) _bubbleInformationTextController.forward();
 
         return BlocBuilder<RandomPathBloc, RandomPathState>(
             buildWhen: (previousState, state) {
@@ -66,14 +87,16 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
               } else {
                 return false;
               }
-            }, builder: (BuildContext context, RandomPathState state) {
+            },
+            builder: (BuildContext context, RandomPathState state) {
           if (state is RandomPathGeneratedState) {
-            if(bubbleTouchState is! BubbleClickedState) _bubbleOffsetController.forward();
+            bool bubbleTouched = bubbleTouchState is BubbleClickedState;
+            if(!bubbleTouched) _bubbleOffsetController.forward();
             return AnimatedBuilder(
               animation: _bubbleOffsetController,
               child: GestureDetector(
-                onTapUp: _onBubbleTapped,
-                child: Container(
+                onTapUp: (TapUpDetails tapUpDetails) => !bubbleTouched ? _onBubbleTapped(tapUpDetails: tapUpDetails, index: widget.index):null,
+                child: !bubbleTouched || widget.index != bubbleTouchState.index ? Container(
                     width: 200,
                     height: 200,
                     decoration: BoxDecoration(
@@ -83,7 +106,24 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
                     ),
                     child: Center(
                       child: Text('${widget.index}'),
-                    )),
+                    ))
+                :
+                AnimatedBuilder(
+                  animation: _bubbleInformationTextController,
+                  builder: (context, child) {
+                    return Transform.translate(
+                      offset: Offset(0.0, _bubbleInformationTextController.value * 1000),
+                      child: child
+                    );
+                  },
+                  child: Container(
+                    width: 200,
+                    height: 200,
+                    child: Center(
+                      child: Text('I am a text'),
+                    ),
+                  ),
+                ),
               ),
               builder: (BuildContext context, Widget child) {
                 Path path = state.path;
@@ -122,14 +162,13 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
     return positionDetailsForBubble.position;
   }
 
-  void _onBubbleTapped(TapUpDetails tapUpDetails) {
+  void _onBubbleTapped({@required TapUpDetails tapUpDetails, @required int index}) {
     _bubbleOffsetController.stop();
-    print('Stopped');
     BubbleTouchBloc bubbleTouchBloc =
     Provider.of<BubbleTouchBloc>(context, listen: false);
 
     bubbleTouchBloc
-        .add(BubbleClickedEvent(touchOffset: tapUpDetails.globalPosition));
+        .add(BubbleClickedEvent(touchOffset: tapUpDetails.globalPosition, index: index));
   }
 
   void _generateRandomPathForBubble({@required int index}) {
