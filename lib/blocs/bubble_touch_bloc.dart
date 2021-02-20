@@ -5,23 +5,23 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:fayizali/constants.dart' as constants;
 
-abstract class BubbleTouchEvent {}
+abstract class TouchEvent {}
 
-class BubbleClickedEvent extends BubbleTouchEvent {
+class BubbleTouchEvent extends TouchEvent {
   final Offset touchOffset;
   final int index;
 
-  BubbleClickedEvent({@required this.touchOffset, @required this.index});
+  BubbleTouchEvent({@required this.touchOffset, @required this.index});
 }
 
-class BubbleTouchBloc extends Bloc<BubbleTouchEvent, BubbleTouchState> {
-  BubbleTouchBloc() : super(BubbleTouchInitialState());
+class TouchBloc extends Bloc<TouchEvent, TouchState> {
+  TouchBloc() : super(BubbleTouchInitialState());
 
   @override
-  Stream<BubbleTouchState> mapEventToState(
-      BubbleTouchEvent event,
+  Stream<TouchState> mapEventToState(
+      TouchEvent event,
       ) async* {
-    if(event is BubbleClickedEvent) {
+    if(event is BubbleTouchEvent) {
       yield BubbleClickedState(bubbleClickOffset: event.touchOffset, index: event.index);
 
       yield* _yieldResumeBubbleAfterSomeTime();
@@ -34,18 +34,18 @@ class BubbleTouchBloc extends Bloc<BubbleTouchEvent, BubbleTouchState> {
   }
 }
 
-abstract class BubbleTouchState {
+abstract class TouchState {
   final int index;
-  BubbleTouchState({@required this.index});
+  TouchState({@required this.index});
 
 }
 
-class BubbleTouchInitialState extends BubbleTouchState {}
+class BubbleTouchInitialState extends TouchState {}
 
-class BubbleClickedState extends BubbleTouchState {
+class BubbleClickedState extends TouchState {
   final Offset bubbleClickOffset;
 
   BubbleClickedState({@required this.bubbleClickOffset, index }):super(index: index);
 }
 
-class BubbleResumeState extends BubbleTouchState {}
+class BubbleResumeState extends TouchState {}

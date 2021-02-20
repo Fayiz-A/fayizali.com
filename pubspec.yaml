@@ -52,9 +52,6 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-     - assets/dart1.png
-     - assets/arrow.png
-     - assets/dart-test.png
      - assets/dart.png
      - assets/dart_board.png
      - assets/wall.jpg

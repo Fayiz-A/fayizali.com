@@ -1,5 +1,6 @@
 import 'package:fayizali/blocs/bubble_touch_bloc.dart';
 import 'package:fayizali/blocs/circle_sector_coordinates_bloc.dart';
+import 'package:fayizali/blocs/color_bloc.dart';
 import 'package:fayizali/blocs/math_bloc.dart';
 import 'package:fayizali/blocs/random_path_bloc.dart';
 import 'package:fayizali/blocs/url_bloc.dart';
@@ -24,7 +25,8 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => UrlBloc()),
         BlocProvider(create: (_) => MathBloc()),
         BlocProvider(create: (_) => CircleSectorCoordinatesBloc()),
-        BlocProvider(create: (_) => BubbleTouchBloc()),
+        BlocProvider(create: (_) => TouchBloc()),
+        BlocProvider(create: (_) => ColorBloc()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
@@ -34,7 +36,7 @@ class MyApp extends StatelessWidget {
                 primarySwatch: Colors.red,
                 splashFactory: InkRipple.splashFactory,
             ),
-        home: GeneralInfoPage(),
+        home: HomePage(),
       ),
     );
   }
