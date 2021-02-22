@@ -56,8 +56,6 @@ class CircleSectorCoordinatesBloc
         for (int side = 1; side <= numberOfSectors; side++) {
           double angleInRadians = state.angle;
           double angleOfSectorLocation = angleInRadians * side;
-          print('ConvertedAngle in radians is: $angleInRadians');
-          print('Angle Of Sector Location is: $angleOfSectorLocation');
 
           double corX = math.cos(angleOfSectorLocation) * radius + center.dx;
           double corY = math.sin(angleOfSectorLocation) * radius + center.dy;

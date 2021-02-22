@@ -28,6 +28,7 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
   void initState() {
     super.initState();
 
+
     _bubbleOffsetController = AnimationController(
       vsync: this,
       duration: _generateRandomDurationInMS(),
@@ -39,20 +40,33 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
           _generateRandomColorForBubble(index: widget.index);
           _bubbleOffsetController.forward(from: 0.0);
 
-          // _bubbleOffsetController.duration = _generateRandomDurationInMS();
+          _bubbleOffsetController.duration = _generateRandomDurationInMS();
         }
-      })
-      ..forward();
+      })..forward();
 
     _bubbleInformationTextController = AnimationController(
         vsync: this,
         duration: Duration(
-            milliseconds: (constants.bubbleStopDurationInMS / 2).round()));
+            milliseconds: (constants.bubbleStopDurationInMS / 2).round())
+    )..addStatusListener((status) {
+      if(status == AnimationStatus.completed) {
+        _bubbleOffsetController.forward(from: 0.0);
+      }
+    });
   }
+
+  RandomPathBloc randomPathBloc;
+  ColorBloc colorBloc;
+  TouchBloc bubbleTouchBloc;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+
+    randomPathBloc = Provider.of<RandomPathBloc>(context, listen: false);
+    colorBloc = Provider.of<ColorBloc>(context, listen: false);
+    bubbleTouchBloc = Provider.of<TouchBloc>(context, listen: false);
+
     _generateRandomPathForBubble(index: widget.index);
     _generateRandomColorForBubble(index: widget.index);
   }
@@ -66,6 +80,8 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
 
   @override
   Widget build(BuildContext context) {
+    _generateRandomColorForBubble(index: widget.index);
+
     return BlocBuilder<TouchBloc, TouchState>(
         builder: (context, bubbleTouchState) {
           if (bubbleTouchState is BubbleClickedState) {
@@ -73,9 +89,8 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
             int bubblePauseDuration = constants.bubbleStopDurationInMS;
 
             if (bubbleTouchState.index == widget.index) {
-              Timer(Duration(milliseconds: bubblePauseDuration), () {
-                _bubbleOffsetController.forward(from: 0.0);
-              });
+              // Timer(Duration(milliseconds: bubblePauseDuration), () {
+              // });
               Timer(Duration(
                   milliseconds: (bubblePauseDuration / 2).round()), () {
                 _bubbleInformationTextController.forward(from: 0.0);
@@ -105,34 +120,31 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
                   child: !bubbleTouched || widget.index != bubbleTouchState.index
                       ? BlocBuilder<ColorBloc, ColorState>(
                       buildWhen: (previousState, bubbleColorState) {
-                        if(bubbleColorState is RandomColorGeneratedState) {
-                          // print('Color State with index: ${bubbleColorState.index} & with color: ${bubbleColorState.randomColor}');
-                        }
-                        if (widget.index == bubbleColorState.index) {
-                          return true;
+                        if(bubbleColorState is RandomColorGeneratedState && widget.index == bubbleColorState.index) {
+                            return true;
                         } else {
                           return false;
                         }
-                      }, builder: (BuildContext context, ColorState state) {
-                    if (state is RandomColorGeneratedState) {
+
+                      }, builder: (BuildContext context, ColorState colorState) {
+                    if (colorState is RandomColorGeneratedState) {
                       return Container(
                           width: 200,
                           height: 200,
                           decoration: BoxDecoration(
                             border: Border.all(
-                                color: HexColor.fromHex(state.randomColor)
+                                color: HexColor.fromHex(colorState.randomColor)
                                     .withOpacity(0.4),
                                 width: 2.0),
                             shape: BoxShape.circle,
-                            color: HexColor.fromHex(state.randomColor)
+                            color: HexColor.fromHex(colorState.randomColor)
                                 .withOpacity(0.4),
                           ),
                           child: Center(
-                            child: Text('${state.index}'),
+                            child: Text('${colorState.index}'),
                           ));
                     } else {
-                      return Text(
-                          'Unknown State Generated for a Bubble Color');
+                      return Container();
                     }
                   })
                       : AnimatedBuilder(
@@ -195,15 +207,12 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
 
   void _onBubbleTapped(
       {@required TapUpDetails tapUpDetails, @required int index}) {
-    TouchBloc bubbleTouchBloc = Provider.of<TouchBloc>(context, listen: false);
 
     bubbleTouchBloc.add(BubbleTouchEvent(
         touchOffset: tapUpDetails.globalPosition, index: index));
   }
 
   void _generateRandomPathForBubble({@required int index}) {
-    RandomPathBloc randomPathBloc =
-    Provider.of<RandomPathBloc>(context, listen: false);
 
     randomPathBloc.add(RandomPathGeneratorEvent(
         windowSize: MediaQuery.of(context).size, index: index));
@@ -219,7 +228,6 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
   }
 
   void _generateRandomColorForBubble({@required int index}) {
-    ColorBloc colorBloc = Provider.of<ColorBloc>(context, listen: false);
 
     colorBloc.add(RandomColorGeneratorEvent(index: index));
     // String colorHexValues = 'abc123';

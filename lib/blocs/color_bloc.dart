@@ -26,7 +26,7 @@ class ColorBloc extends Bloc<ColorEvent, ColorState> {
       _generateRandomColor(lightColor: event.lightColor ?? false,):
       _generateRandomColor(lightColor: event.lightColor ?? false, customColorCodes: event.colorCode);
 
-      print('Index is: ${event.index} & Color is ${event.colorCode}');
+      // print('Color generated is $randomColor & index is: ${event.index}');
 
       yield RandomColorGeneratedState(randomColor: randomColor, index: event.index);
     } else {
