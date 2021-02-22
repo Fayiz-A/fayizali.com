@@ -80,7 +80,6 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
 
   @override
   Widget build(BuildContext context) {
-    _generateRandomColorForBubble(index: widget.index);
 
     return BlocBuilder<TouchBloc, TouchState>(
         builder: (context, bubbleTouchState) {
@@ -154,7 +153,7 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
                       height: 200,
                       child: Center(
                         child: Text(
-                          'I am a text',
+                          'I am a text ',
                           style: TextStyle(fontSize: 20),
                         ),
                       ),

@@ -36,7 +36,7 @@ class MyApp extends StatelessWidget {
                 primarySwatch: Colors.red,
                 splashFactory: InkRipple.splashFactory,
             ),
-        home: GeneralInfoPage(),
+        home: HomePage(),
       ),
     );
   }

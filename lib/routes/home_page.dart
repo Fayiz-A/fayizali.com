@@ -278,32 +278,32 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           bottom: 40, //TODO: Remove this hardcoding
           child: _renderLever(),
         ),
-        //TODO: Remove the widget below as it is only for testing
-        BlocBuilder<CircleSectorCoordinatesBloc, CircleSectorCoordinatesState>(
-            builder: (context, state) {
-              if (state is CircleSectorEndCoordinatesIdentifiedState) {
-                return Stack(
-                    alignment: Alignment.center,
-                    children: state.sectorEndCoordinatesList
-                        .map<Widget>((e) => Positioned(
-                      left: e.dx - 10,
-                      top: e.dy - 10,
-                      child: Container(
-                        width: 20,
-                        height: 20,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle, color: Colors.yellow),
-                        child: Text(state.sectorEndCoordinatesList
-                            .indexOf(e)
-                            .toString()),
-                      ),
-                    ))
-                        .toList());
-              } else {
-                return Container();
-              }
-            })
+        // TODO: Remove the widget below as it is only for testing
+        // BlocBuilder<CircleSectorCoordinatesBloc, CircleSectorCoordinatesState>(
+        //     builder: (context, state) {
+        //       if (state is CircleSectorEndCoordinatesIdentifiedState) {
+        //         return Stack(
+        //             alignment: Alignment.center,
+        //             children: state.sectorEndCoordinatesList
+        //                 .map<Widget>((e) => Positioned(
+        //               left: e.dx - 10,
+        //               top: e.dy - 10,
+        //               child: Container(
+        //                 width: 20,
+        //                 height: 20,
+        //                 alignment: Alignment.center,
+        //                 decoration: BoxDecoration(
+        //                     shape: BoxShape.circle, color: Colors.yellow),
+        //                 child: Text(state.sectorEndCoordinatesList
+        //                     .indexOf(e)
+        //                     .toString()),
+        //               ),
+        //             ))
+        //                 .toList());
+        //       } else {
+        //         return Container();
+        //       }
+        //     })
       ]),
     );
   }

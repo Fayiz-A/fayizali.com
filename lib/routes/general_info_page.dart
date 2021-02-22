@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:math' as math;
+import 'package:fayizali/blocs/color_bloc.dart';
 import 'package:fayizali/widgets/custom_animated_bubble.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 class GeneralInfoPage extends StatelessWidget {
   @override
@@ -24,9 +26,12 @@ class _BackgroundState extends State<Background> {
 
   Color _color = Colors.red;
 
+  ColorBloc colorBloc;
+
   @override
   void initState() {
     super.initState();
+
 
     // Timer.periodic(Duration(milliseconds: 1500), (timer) {
     //   setState(() {
@@ -36,13 +41,29 @@ class _BackgroundState extends State<Background> {
     //   });
     // });
   }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+
+    colorBloc = BlocProvider.of<ColorBloc>(context);
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      // duration: Duration(milliseconds: 700),
-      width: double.infinity,
-      height: double.infinity,
-      color: _color,
+    return BlocBuilder<ColorBloc, ColorState>(
+      buildWhen: (previousState, state) {
+        if(state is RandomColorGeneratedState) return true;
+        return false;
+      },
+      builder: (context, snapshot) {
+        return AnimatedContainer(
+          duration: Duration(milliseconds: 700),
+          width: double.infinity,
+          height: double.infinity,
+          color: _color,
+        );
+      }
     );
   }
 }
