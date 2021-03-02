@@ -1,3 +1,4 @@
+import 'dart:html' as html;
 import 'dart:ui';
 
 import 'package:fayizali/constants.dart' as constants;
@@ -7,6 +8,7 @@ import 'package:fayizali/blocs/math_bloc.dart';
 import 'package:fayizali/providers/dart_provider.dart';
 import 'package:fayizali/providers/lever_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
 
@@ -28,10 +30,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       width: window.physicalSize.width,
       height: window.physicalSize.height,
     );
+
   }
 
   MathBloc mathBloc;
   List<Offset> sectorEndCoordinatesList;
+
+  bool alertDialogShown = false;
 
   @override
   void didChangeDependencies() async {
@@ -41,7 +46,64 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     mathBloc = Provider.of<MathBloc>(context, listen: false);
 
+    if(!alertDialogShown) {
+      showWebsiteUnderConstructionAlertDialogBox();
+      alertDialogShown = true;
+    }
+
     super.didChangeDependencies();
+  }
+
+  void showWebsiteUnderConstructionAlertDialogBox() {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text('Warning!'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.warning_sharp, size: MediaQuery.of(context).size.width * 0.2,),
+              Text('This Website is under Construction. \nBe careful while walking else you might fall (-;',),
+            ],
+          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+          actions: <Widget>[
+            FlatButton(
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+              color: Colors.green,
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+                showInstructionDialogBox();// Dismiss alert dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showInstructionDialogBox() {
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text('Instruction'),
+          content: Text('1. Drag the blue color dart to wherever you want to hit it.\n2. Drag the green color lever and then release it.\n3. The dart will get released.\n\n- The cream colored sectors in the dart board are for General Info Page.\n- The black colored sectors are for computer languages page'),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('buttonText'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop(); // Dismiss alert dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   captureSectorIndexFromMathBlocAndNavigate() async {
@@ -55,12 +117,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               SnackBar(
                 content: Row(
                   children: <Widget>[
-                    Icon(Icons.fast_rewind),
+                    Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: Icon(Icons.fast_rewind),
+                    ),
                     Text('Please hit the dart inside the dartboard'),
                   ]
                 )
             )
-          );
+          ).closed.then((value) => html.window.location.reload());
+
+
         } else {
           var route = constants.routesListAccordingToDartBoard[state.sectorContainingCoordinateIndex];
 
@@ -91,7 +158,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
 
     circleSectorCoordinatesBloc.add(CircleSectorEndCoordinatesIdentifierEvent(
-        radius: (windowSize.height - 250) / 2,
+        radius: (windowSize.height - (windowSize.height * 0.02 * 2)) / 2,
         numberOfSectors: 20,
         center: Offset(windowSize.width / 2, windowSize.height / 2)));
 
@@ -185,8 +252,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     double scaleValue = dartProvider.scaleValue;
 
     return Positioned(
-        left: offset.dx - ((MediaQuery.of(context).size.width * 0.02) / 2),
-        top: offset.dy - ((MediaQuery.of(context).size.height * 0.02) / 2),
+        left: offset.dx - ((MediaQuery.of(context).size.width * 0.03) / 2),
+        top: offset.dy - ((MediaQuery.of(context).size.height * 0.03) / 2),
         child: GestureDetector(
           onPanUpdate: _onDartDragged,
           child: ScaleTransition(
@@ -197,9 +264,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         ));
   }
 
-  Widget _renderBoard() {
+  Widget _renderBoard({@required double screenWidth, @required double screenHeight}) {
     return Padding(
-      padding: const EdgeInsets.all(40.0), //TODO: Remove this hardcoding
+      padding: EdgeInsets.all(screenWidth * 0.02), //TODO: Remove this hardcoding
       child: AnimatedBuilder(
         animation: dartBoardSlideAnimation,
         builder: (context, child) {
@@ -207,7 +274,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             offset: Offset(
                 0,
                 dartBoardSlideAnimation.value *
-                    (MediaQuery.of(context).size.height / 4)),
+                    (screenHeight / 4)),
             child: child,
           );
         },
@@ -221,14 +288,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _renderLever() {
+  Widget _renderLever({@required double screenWidth, @required double screenHeight}) {
     return SlideTransition(
       position: leverDartSlideAnimation,
       child: Container(
         key: leverKey,
         width: 50.0,
         //TODO: Remove this hardcoding
-        height: MediaQuery.of(context).size.height / 2.5,
+        height: screenHeight / 2.5,
         alignment: Alignment.bottomCenter,
         decoration: BoxDecoration(
             color: Colors.green,
@@ -268,48 +335,57 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     dartProvider = Provider.of<DartProvider>(context);
     leverProvider = Provider.of<LeverProvider>(context);
 
-    return Scaffold(
-      body: Stack(children: <Widget>[
-        wallImage,
-        Align(alignment: Alignment.center, child: _renderBoard()),
-        _renderDart(),
-        Positioned(
-          right: 40, //TODO: Remove this hardcoding
-          bottom: 40, //TODO: Remove this hardcoding
-          child: _renderLever(),
-        ),
-        // TODO: Remove the widget below as it is only for testing
-        // BlocBuilder<CircleSectorCoordinatesBloc, CircleSectorCoordinatesState>(
-        //     builder: (context, state) {
-        //       if (state is CircleSectorEndCoordinatesIdentifiedState) {
-        //         return Stack(
-        //             alignment: Alignment.center,
-        //             children: state.sectorEndCoordinatesList
-        //                 .map<Widget>((e) => Positioned(
-        //               left: e.dx - 10,
-        //               top: e.dy - 10,
-        //               child: Container(
-        //                 width: 20,
-        //                 height: 20,
-        //                 alignment: Alignment.center,
-        //                 decoration: BoxDecoration(
-        //                     shape: BoxShape.circle, color: Colors.yellow),
-        //                 child: Text(state.sectorEndCoordinatesList
-        //                     .indexOf(e)
-        //                     .toString()),
-        //               ),
-        //             ))
-        //                 .toList());
-        //       } else {
-        //         return Container();
-        //       }
-        //     })
-      ]),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+
+        double screenWidth = constraints.maxWidth;
+        double screenHeight = constraints.maxHeight;
+
+        return Scaffold(
+          body: Stack(children: <Widget>[
+            wallImage,
+            Align(alignment: Alignment.center, child: _renderBoard(screenWidth: screenWidth, screenHeight: screenHeight)),
+            _renderDart(),
+            Positioned(
+              right: screenWidth * 0.04,
+              bottom: screenHeight * 0.05,
+              child: _renderLever(screenWidth: screenWidth, screenHeight: screenHeight),
+            ),
+            // TODO: Remove the widget below as it is only for testing
+            // BlocBuilder<CircleSectorCoordinatesBloc, CircleSectorCoordinatesState>(
+            //     builder: (context, state) {
+            //       if (state is CircleSectorEndCoordinatesIdentifiedState) {
+            //         return Stack(
+            //             alignment: Alignment.center,
+            //             children: state.sectorEndCoordinatesList
+            //                 .map<Widget>((e) => Positioned(
+            //               left: e.dx - 10,
+            //               top: e.dy - 10,
+            //               child: Container(
+            //                 width: 20,
+            //                 height: 20,
+            //                 alignment: Alignment.center,
+            //                 decoration: BoxDecoration(
+            //                     shape: BoxShape.circle, color: Colors.yellow),
+            //                 child: Text(state.sectorEndCoordinatesList
+            //                     .indexOf(e)
+            //                     .toString()),
+            //               ),
+            //             ))
+            //                 .toList());
+            //       } else {
+            //         return Container();
+            //       }
+            //     })
+          ]),
+        );
+      }
     );
   }
 }
 
 class Dart extends StatefulWidget {
+
   @override
   _DartState createState() => _DartState();
 }
@@ -317,12 +393,12 @@ class Dart extends StatefulWidget {
 class _DartState extends State<Dart> {
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width;
+    double screenHeight = MediaQuery.of(context).size.height;
 
     return Image.asset(
       'dart.png',
-      width: screenWidth * 0.02,
-      height: screenWidth * 0.02,
+      width: screenHeight * 0.03,
+      height: screenHeight * 0.03,
     );
   }
 }

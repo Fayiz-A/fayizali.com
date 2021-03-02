@@ -9,9 +9,8 @@ abstract class ColorEvent {}
 class RandomColorGeneratorEvent extends ColorEvent {
   final bool lightColor;
   final String colorCode;
-  final int index;
 
-  RandomColorGeneratorEvent({this.lightColor, this.colorCode, @required this.index});
+  RandomColorGeneratorEvent({this.lightColor, this.colorCode});
 }
 
 class ColorBloc extends Bloc<ColorEvent, ColorState> {
@@ -23,12 +22,11 @@ class ColorBloc extends Bloc<ColorEvent, ColorState> {
   ) async* {
     if(event is RandomColorGeneratorEvent) {
       String randomColor = event.colorCode == null ?
-      _generateRandomColor(lightColor: event.lightColor ?? false,):
+      _generateRandomColor(lightColor: event.lightColor ?? false,)
+          :
       _generateRandomColor(lightColor: event.lightColor ?? false, customColorCodes: event.colorCode);
 
-      // print('Color generated is $randomColor & index is: ${event.index}');
-
-      yield RandomColorGeneratedState(randomColor: randomColor, index: event.index);
+      yield RandomColorGeneratedState(randomColor: randomColor);
     } else {
       yield ColorInitialState();
     }
@@ -54,16 +52,12 @@ class ColorBloc extends Bloc<ColorEvent, ColorState> {
   }
 }
 
-abstract class ColorState {
-  final int index;
-  ColorState({this.index});
-}
+abstract class ColorState {}
 
 class ColorInitialState extends ColorState {}
 
 class RandomColorGeneratedState extends ColorState {
   final String randomColor;
-  final int index;
 
-  RandomColorGeneratedState({@required this.randomColor, @required this.index}):super(index: index);
+  RandomColorGeneratedState({@required this.randomColor});
 }

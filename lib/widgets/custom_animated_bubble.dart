@@ -4,8 +4,10 @@ import 'dart:ui';
 
 import 'package:fayizali/blocs/bubble_touch_bloc.dart';
 import 'package:fayizali/blocs/color_bloc.dart';
+import 'package:fayizali/blocs/integrators/general_info_page/bubble_color_generator.dart';
 import 'package:fayizali/blocs/random_path_bloc.dart';
 import 'package:fayizali/constants.dart' as constants;
+import 'package:fayizali/extensions/hex_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:provider/provider.dart';
@@ -56,7 +58,7 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
   }
 
   RandomPathBloc randomPathBloc;
-  ColorBloc colorBloc;
+  BubbleColorGeneratorBloc bubbleColorBloc;
   TouchBloc bubbleTouchBloc;
 
   @override
@@ -64,7 +66,7 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
     super.didChangeDependencies();
 
     randomPathBloc = Provider.of<RandomPathBloc>(context, listen: false);
-    colorBloc = Provider.of<ColorBloc>(context, listen: false);
+    bubbleColorBloc = Provider.of<BubbleColorGeneratorBloc>(context, listen: false);
     bubbleTouchBloc = Provider.of<TouchBloc>(context, listen: false);
 
     _generateRandomPathForBubble(index: widget.index);
@@ -81,115 +83,123 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
   @override
   Widget build(BuildContext context) {
 
-    return BlocBuilder<TouchBloc, TouchState>(
-        builder: (context, bubbleTouchState) {
-          if (bubbleTouchState is BubbleClickedState) {
-            _bubbleOffsetController.stop(canceled: false);
-            int bubblePauseDuration = constants.bubbleStopDurationInMS;
+    return LayoutBuilder(
+      builder: (context, constraints) {
 
-            if (bubbleTouchState.index == widget.index) {
-              // Timer(Duration(milliseconds: bubblePauseDuration), () {
-              // });
-              Timer(Duration(
-                  milliseconds: (bubblePauseDuration / 2).round()), () {
-                _bubbleInformationTextController.forward(from: 0.0);
-              });
-            }
-          }
-          // else if (bubbleTouchState is BubbleResumeState) print('');
+        double screenWidth = constraints.maxWidth;
+        double screenHeight = constraints.maxHeight;
 
-          return BlocBuilder<RandomPathBloc, RandomPathState>(
-              buildWhen: (previousState, state) {
-                if (state is RandomPathGeneratedState && state.index == widget.index) {
-                  return true;
-                } else {
-                  return false;
+        return BlocBuilder<TouchBloc, TouchState>(
+            builder: (context, bubbleTouchState) {
+              if (bubbleTouchState is BubbleClickedState) {
+                _bubbleOffsetController.stop(canceled: false);
+                int bubblePauseDuration = constants.bubbleStopDurationInMS;
+
+                if (bubbleTouchState.index == widget.index) {
+                  // Timer(Duration(milliseconds: bubblePauseDuration), () {
+                  // });
+                  Timer(Duration(
+                      milliseconds: (bubblePauseDuration / 2).round()), () {
+                    _bubbleInformationTextController.forward(from: 0.0);
+                  });
                 }
-              }, builder: (BuildContext context, RandomPathState state) {
-            if (state is RandomPathGeneratedState) {
-              bool bubbleTouched = bubbleTouchState is BubbleClickedState;
-              if (!bubbleTouched) _bubbleOffsetController.forward();
-              return AnimatedBuilder(
-                animation: _bubbleOffsetController,
-                child: GestureDetector(
-                  onTapUp: (TapUpDetails tapUpDetails) => !bubbleTouched
-                      ? _onBubbleTapped(
-                      tapUpDetails: tapUpDetails, index: widget.index)
-                      : null,
-                  child: !bubbleTouched || widget.index != bubbleTouchState.index
-                      ? BlocBuilder<ColorBloc, ColorState>(
-                      buildWhen: (previousState, bubbleColorState) {
-                        if(bubbleColorState is RandomColorGeneratedState && widget.index == bubbleColorState.index) {
-                            return true;
-                        } else {
-                          return false;
-                        }
+              }
+              // else if (bubbleTouchState is BubbleResumeState) print('');
 
-                      }, builder: (BuildContext context, ColorState colorState) {
-                    if (colorState is RandomColorGeneratedState) {
-                      return Container(
+              return BlocBuilder<RandomPathBloc, RandomPathState>(
+                  buildWhen: (previousState, state) {
+                    if (state is RandomPathGeneratedState && state.index == widget.index) {
+                      return true;
+                    } else {
+                      return false;
+                    }
+                  }, builder: (BuildContext context, RandomPathState state) {
+                if (state is RandomPathGeneratedState) {
+                  bool bubbleTouched = bubbleTouchState is BubbleClickedState;
+                  if (!bubbleTouched) _bubbleOffsetController.forward();
+                  return AnimatedBuilder(
+                    animation: _bubbleOffsetController,
+                    child: GestureDetector(
+                      onTapUp: (TapUpDetails tapUpDetails) => !bubbleTouched
+                          ? _onBubbleTapped(
+                          tapUpDetails: tapUpDetails, index: widget.index)
+                          : null,
+                      child: !bubbleTouched || widget.index != bubbleTouchState.index
+                          ? BlocBuilder<BubbleColorGeneratorBloc, BubbleColorGeneratedState>(
+                          buildWhen: (previousState, bubbleColorState) {
+                            if(bubbleColorState is BubbleColorGeneratedState && widget.index == bubbleColorState.index) {
+                                return true;
+                            } else {
+                              return false;
+                            }
+
+                          }, builder: (BuildContext context, BubbleColorGeneratedState colorState) {
+                        if (colorState is BubbleColorGeneratedState) {
+                          return Container(
+                              width: screenWidth * 0.2,
+                              height: screenWidth * 0.2,
+                              decoration: BoxDecoration(
+                                border: Border.all(
+                                    color: HexColor.fromHex(colorState.color)
+                                        .withOpacity(0.4),
+                                    width: 2.0),
+                                shape: BoxShape.circle,
+                                color: HexColor.fromHex(colorState.color)
+                                    .withOpacity(0.4),
+                              ),
+                              child: Center(
+                                child: Text('Press Me'),
+                              ));
+                        } else {
+                          return Container();
+                        }
+                      })
+                          : AnimatedBuilder(
+                        animation: _bubbleInformationTextController,
+                        child: Container(
                           width: 200,
                           height: 200,
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                                color: HexColor.fromHex(colorState.randomColor)
-                                    .withOpacity(0.4),
-                                width: 2.0),
-                            shape: BoxShape.circle,
-                            color: HexColor.fromHex(colorState.randomColor)
-                                .withOpacity(0.4),
-                          ),
                           child: Center(
-                            child: Text('${colorState.index}'),
-                          ));
-                    } else {
-                      return Container();
-                    }
-                  })
-                      : AnimatedBuilder(
-                    animation: _bubbleInformationTextController,
-                    child: Container(
-                      width: 200,
-                      height: 200,
-                      child: Center(
-                        child: Text(
-                          'I am a text ',
-                          style: TextStyle(fontSize: 20),
+                            child: Text(
+                              'I am a text ',
+                              style: TextStyle(fontSize: 20),
+                            ),
+                          ),
                         ),
+                        builder: (context, child) {
+                          return Transform.translate(
+                              offset: Offset(
+                                  0,
+                                  _bubbleInformationTextController.value *
+                                      MediaQuery.of(context).size.height),
+                              child: child);
+                        },
                       ),
                     ),
-                    builder: (context, child) {
-                      return Transform.translate(
-                          offset: Offset(
-                              0,
-                              _bubbleInformationTextController.value *
-                                  MediaQuery.of(context).size.height),
-                          child: child);
+                    builder: (BuildContext context, Widget child) {
+                      Path path = state.path;
+                      double animValue = _bubbleOffsetController.value;
+                      return Stack(children: [
+                        Positioned(
+                            left: _getPathCurveDetails(
+                              path: path,
+                              animValue: animValue,
+                            ).dx,
+                            top: _getPathCurveDetails(
+                              path: path,
+                              animValue: animValue,
+                            ).dy,
+                            child: child)
+                      ]);
                     },
-                  ),
-                ),
-                builder: (BuildContext context, Widget child) {
-                  Path path = state.path;
-                  double animValue = _bubbleOffsetController.value;
-                  return Stack(children: [
-                    Positioned(
-                        left: _getPathCurveDetails(
-                          path: path,
-                          animValue: animValue,
-                        ).dx,
-                        top: _getPathCurveDetails(
-                          path: path,
-                          animValue: animValue,
-                        ).dy,
-                        child: child)
-                  ]);
-                },
-              );
-            } else {
-              return Text('Unknown State');
-            }
-          });
-        });
+                  );
+                } else {
+                  return Text('Unknown State');
+                }
+              });
+            });
+      }
+    );
   }
 
   Offset _getPathCurveDetails({
@@ -228,32 +238,7 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
 
   void _generateRandomColorForBubble({@required int index}) {
 
-    colorBloc.add(RandomColorGeneratorEvent(index: index));
-    // String colorHexValues = 'abc123';
-    //
-    // List<String> colorHexValuesList = colorHexValues.split('');
-    // List<String> randomColorValuesList = [];
-    // randomColorValuesList.add('#');
-    //
-    // for(int codeIndex = 0; codeIndex < colorHexValuesList.length; codeIndex++) {
-    //   math.Random random = math.Random();
-    //   int randomIndex = random.nextInt(colorHexValuesList.length - 1).abs();
-    //
-    //   randomColorValuesList.add(colorHexValuesList[randomIndex]);
-    // }
-    //
-    // String randomColor = randomColorValuesList.join();
-    //
-    // return randomColor;
-  }
-}
+    bubbleColorBloc.add(BubbleColorGeneratorEvent(index: index));
 
-extension HexColor on Color {
-  /// String is in the format "aabbcc" or "ffaabbcc" with an optional leading "#".
-  static Color fromHex(String hexString) {
-    final StringBuffer buffer = StringBuffer();
-    if (hexString.length == 6 || hexString.length == 7) buffer.write('ff');
-    buffer.write(hexString.replaceFirst('#', ''));
-    return Color(int.parse(buffer.toString(), radix: 16));
   }
 }

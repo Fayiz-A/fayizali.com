@@ -11,7 +11,7 @@ class GeneralInfoPage extends StatelessWidget {
     return Scaffold(
         body: Stack(children: [
           Background(),
-      for (int index = 0; index <= 15; index++)
+      for (int index = 0; index <= (MediaQuery.of(context).size.width / 80).round(); index++)
         CustomAnimatedBubble(index: index)
     ]));
   }
@@ -26,44 +26,46 @@ class _BackgroundState extends State<Background> {
 
   Color _color = Colors.red;
 
-  ColorBloc colorBloc;
+  // ColorBloc colorBloc;
 
   @override
   void initState() {
     super.initState();
 
 
-    // Timer.periodic(Duration(milliseconds: 1500), (timer) {
-    //   setState(() {
-    //     List<Color> colorList = [Colors.yellow, Colors.orange, Colors.pink, Colors.indigo, Colors.red, Colors.green, Colors.blue];
-    //
-    //     _color = colorList[math.Random().nextInt(colorList.length - 1).abs()];
-    //   });
-    // });
+    Timer.periodic(Duration(milliseconds: 1500), (timer) {
+      setState(() {
+        List<Color> colorList = [Colors.yellow, Colors.orange, Colors.pink, Colors.indigo, Colors.red, Colors.green, Colors.blue];
+
+        _color = colorList[math.Random().nextInt(colorList.length - 1).abs()];
+      });
+    });
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
 
-    colorBloc = BlocProvider.of<ColorBloc>(context);
+    // colorBloc = BlocProvider.of<ColorBloc>(context);
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ColorBloc, ColorState>(
-      buildWhen: (previousState, state) {
-        if(state is RandomColorGeneratedState) return true;
-        return false;
-      },
-      builder: (context, snapshot) {
-        return AnimatedContainer(
-          duration: Duration(milliseconds: 700),
-          width: double.infinity,
-          height: double.infinity,
-          color: _color,
-        );
-      }
+    return Scaffold(
+      body: BlocBuilder<ColorBloc, ColorState>(
+        buildWhen: (previousState, state) {
+          if(state is RandomColorGeneratedState) return true;
+          return false;
+        },
+        builder: (context, state) {
+          return AnimatedContainer(
+            duration: Duration(milliseconds: 700),
+            width: double.infinity,
+            height: double.infinity,
+            color: _color,
+          );
+        }
+      ),
     );
   }
 }
