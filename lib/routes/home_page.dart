@@ -161,8 +161,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     Size windowSize = Size(
         MediaQuery.of(context).size.width, MediaQuery.of(context).size.height);
 
-    CircleSectorCoordinatesBloc circleSectorCoordinatesBloc =
-    Provider.of<CircleSectorCoordinatesBloc>(context, listen: false);
+    CircleSectorCoordinatesBloc circleSectorCoordinatesBloc = BlocProvider.of<CircleSectorCoordinatesBloc>(context);
 
 
     circleSectorCoordinatesBloc.add(CircleSectorEndCoordinatesIdentifierEvent(
@@ -201,13 +200,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     dartBoardSlideAnimation = Tween(begin: -5.0, end: 0.0).animate(
         CurvedAnimation(
             parent: dartBoardAnimationController,
-            curve: Interval(0.3, 0.5, curve: Curves.bounceOut)));
+            curve: Interval(0.25, 0.45, curve: Curves.bounceOut)));
 
     leverDartSlideAnimation =
         Tween<Offset>(begin: Offset(0.0, -5.0), end: Offset(0.0, 0.0)).animate(
             CurvedAnimation(
                 parent: dartBoardAnimationController,
-                curve: Interval(0.55, 0.75, curve: Curves.elasticOut)));
+                curve: Interval(0.5, 0.7, curve: Curves.elasticOut)));
 
     dartAnimationController =
     AnimationController(vsync: this, duration: Duration(milliseconds: 400))
@@ -403,21 +402,9 @@ class _DartState extends State<Dart> {
     double screenHeight = MediaQuery.of(context).size.height;
 
     return Image.asset(
-      'dart.png',
+      'assets/dart.png',
       width: screenHeight * 0.03,
       height: screenHeight * 0.03,
     );
-  }
-}
-
-class DartBoardPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawCircle(Offset(300, 300), 270, Paint()..color = Colors.red);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter old) {
-    return true;
   }
 }

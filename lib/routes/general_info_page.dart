@@ -51,21 +51,11 @@ class _BackgroundState extends State<Background> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: BlocBuilder<ColorBloc, ColorState>(
-        buildWhen: (previousState, state) {
-          if(state is RandomColorGeneratedState) return true;
-          return false;
-        },
-        builder: (context, state) {
-          return AnimatedContainer(
+    return AnimatedContainer(
             duration: Duration(milliseconds: 700),
             width: double.infinity,
             height: double.infinity,
             color: _color,
           );
-        }
-      ),
-    );
   }
 }
