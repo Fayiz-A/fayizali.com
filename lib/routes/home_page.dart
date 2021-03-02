@@ -60,23 +60,24 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: Text('Warning!'),
+          title: Text('Important Notice'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.warning_sharp, size: MediaQuery.of(context).size.width * 0.2,),
-              Text('This Website is under Construction. \nBe careful while walking else you might fall (-;',),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 5.0),
+                child: Image.network('https://images.unsplash.com/photo-1590834367872-3297c46273ac?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=934&q=80', width: MediaQuery.of(context).size.width * 0.2, height: MediaQuery.of(context).size.width * 0.2,),
+              ),
+              Text('Something Great is under Construction.\nBe careful while walking else you might fall (-;',),
             ],
           ),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
           actions: <Widget>[
-            FlatButton(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
-              color: Colors.green,
+            TextButton(
               child: Text('OK'),
               onPressed: () {
                 Navigator.of(dialogContext).pop();
-                showInstructionDialogBox();// Dismiss alert dialog
+                showInstructionsDialogBoxAndInitializePage();// Dismiss alert dialog
               },
             ),
           ],
@@ -85,19 +86,26 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  void showInstructionDialogBox() {
+  void showInstructionsDialogBoxAndInitializePage() {
     showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (BuildContext dialogContext) {
         return AlertDialog(
-          title: Text('Instruction'),
-          content: Text('1. Drag the blue color dart to wherever you want to hit it.\n2. Drag the green color lever and then release it.\n3. The dart will get released.\n\n- The cream colored sectors in the dart board are for General Info Page.\n- The black colored sectors are for computer languages page'),
+          title: Text('Instructions'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.article_outlined, size: MediaQuery.of(context).size.width * 0.2,),
+              Text('1. Drag the blue color dart to wherever you want to hit it.\n2. Drag the green color lever and then release it.\n3. The dart will get released.\n\n- The yellowish type colored sectors in the dart board are for General Info Page.\n- The black colored sectors are for Computer Languages Page.'),
+            ],
+          ),
           actions: <Widget>[
-            FlatButton(
-              child: Text('buttonText'),
+            TextButton(
+              child: Text('OK'),
               onPressed: () {
-                Navigator.of(dialogContext).pop(); // Dismiss alert dialog
+                Navigator.of(dialogContext).pop();
+                dartBoardAnimationController.forward();
               },
             ),
           ],
@@ -106,7 +114,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  captureSectorIndexFromMathBlocAndNavigate() async {
+  void captureSectorIndexFromMathBlocAndNavigate() async {
     await for (MathBlocState state in mathBloc) {
       if(state is MathBlocCoordinateInSectorIdentifierState) {
 
@@ -188,8 +196,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void prepareAnimations() {
     dartBoardAnimationController =
-    AnimationController(vsync: this, duration: Duration(milliseconds: 6000))
-      ..forward();
+    AnimationController(vsync: this, duration: Duration(milliseconds: 6000));
 
     dartBoardSlideAnimation = Tween(begin: -5.0, end: 0.0).animate(
         CurvedAnimation(
