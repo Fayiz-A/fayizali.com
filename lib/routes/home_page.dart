@@ -25,7 +25,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     super.initState();
     prepareAnimations();
     wallImage = Image.asset(
-      'assets/wall.jpg',
+      'wall.jpg',
       fit: BoxFit.fill,
       width: window.physicalSize.width,
       height: window.physicalSize.height,
@@ -66,7 +66,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 5.0),
-                child: Image.network('https://images.unsplash.com/photo-1590834367872-3297c46273ac?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=934&q=80', width: MediaQuery.of(context).size.width * 0.2, height: MediaQuery.of(context).size.width * 0.2,),
+                child: Image.network('https://images.unsplash.com/photo-1590834367872-3297c46273ac?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=934&q=80', width: MediaQuery.of(context).size.width * 0.2, height: MediaQuery.of(context).size.width * 0.2,)
               ),
               Text('Something Great is under Construction.\nBe careful while walking else you might fall (-;',),
             ],
@@ -287,7 +287,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         child: Transform.rotate(//Just to make the sector ends configurable
           angle: 2.02,
           child: Image.asset(
-            'assets/dart_board.png',
+            'dart_board.png',
           ),
         ),
       ),
@@ -399,12 +399,11 @@ class Dart extends StatefulWidget {
 class _DartState extends State<Dart> {
   @override
   Widget build(BuildContext context) {
-    double screenHeight = MediaQuery.of(context).size.height;
-
+    double screenLongestSide = MediaQuery.of(context).size.longestSide;
     return Image.asset(
-      'assets/dart.png',
-      width: screenHeight * 0.03,
-      height: screenHeight * 0.03,
+      'dart.png',
+      width: screenLongestSide * 0.03,
+      height: screenLongestSide * 0.03,
     );
   }
 }
