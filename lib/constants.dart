@@ -27,8 +27,8 @@ List<Object> routesListAccordingToDartBoard = [
   ComputerLanguagesPage(),
 ];
 
-int bubbleAnimationMinDurationInMS = 2000;
-int bubbleAnimationMaxDurationInMS = 5000;
+int bubbleAnimationMinDurationInMS = 3000;
+int bubbleAnimationMaxDurationInMS = 6000;
 int bubbleStopDurationInMS = 3000;
 
 String generalInfoPageFallbackColor = '#000';

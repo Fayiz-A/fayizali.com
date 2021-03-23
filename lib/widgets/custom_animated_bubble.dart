@@ -13,8 +13,9 @@ import 'package:provider/provider.dart';
 
 class CustomAnimatedBubble extends StatefulWidget {
   final int index;
+  final Map<String, String> bubbleDisplayInformation;
 
-  CustomAnimatedBubble({@required this.index});
+  CustomAnimatedBubble({@required this.index, @required this.bubbleDisplayInformation,});
 
   @override
   _CustomAnimatedBubbleState createState() => _CustomAnimatedBubbleState();
@@ -157,7 +158,10 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
                                       .withOpacity(0.4),
                                 ),
                                 child: Center(
-                                  child: Text('Press Me'),
+                                  child: Text(
+                                    '${widget.bubbleDisplayInformation.keys.first}',//map of one key only
+                                    style: TextStyle(fontSize: 20),
+                                  ),
                                 ));
                           } else {
                             return Container();
@@ -169,8 +173,8 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
                         width: 200,
                         height: 200,
                         child: Center(
-                          child: Text(
-                            'I am a text ',
+                          child: SelectableText(
+                            '${widget.bubbleDisplayInformation.values.first}',//map of one value only
                             style: TextStyle(fontSize: 20),
                           ),
                         ),
