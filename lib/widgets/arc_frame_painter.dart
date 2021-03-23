@@ -3,6 +3,11 @@ import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 
 class FramePainter extends CustomPainter {
+
+  final bool smallScreen;
+
+  FramePainter({this.smallScreen = false});
+
   @override
   void paint(Canvas canvas, Size size) {
     Map<String, Offset> mainCoordinatesMap = {
@@ -31,11 +36,11 @@ class FramePainter extends CustomPainter {
               .dy) //just to be safe else this is the default value
       ..lineTo(
           mainCoordinatesMap['topLeft'].dx,
-          size.height > 850
+          size.height > 800
               ? mainCoordinatesMap['topLeft'].dy + size.height * 0.33
               : mainCoordinatesMap['topLeft'].dy +
                   size.height *
-                      0.35) //this is done for the starting point of the curve
+                      0.38) //this is done for the starting point of the curve
       //these hardcoded values do not effect app responsiveness
       ..quadraticBezierTo(90, 240, 90, 200)
       ..quadraticBezierTo(110, 40, 250, 30)
@@ -44,29 +49,6 @@ class FramePainter extends CustomPainter {
 
     canvas.drawShadow(topCurvePath, Colors.black, 20.0, false);
     canvas.drawPath(topCurvePath, topCurvePaint);
-
-    double bottomCenterArcRadius = size.height * 0.18;
-    Offset bottomCenterArcCenter = Offset(
-        mainCoordinatesMap['bottomLeft'].dx + bottomCenterArcRadius * 1.7,
-        mainCoordinatesMap['bottomLeft'].dy + (bottomCenterArcRadius * 0.25));
-
-    drawArcWithOutlineCircle(
-        canvas: canvas,
-        innerCircleRadius: bottomCenterArcRadius * 2 - 30,
-        radiusDifference: 30,
-        innerCircleColor: Colors.red,
-        outerCircleColor: Colors.white,
-        center: mainCoordinatesMap['bottomLeft'],
-        mainCoordinatesMap: mainCoordinatesMap);
-
-    drawArcWithOutlineCircle(
-        canvas: canvas,
-        innerCircleRadius: bottomCenterArcRadius,
-        radiusDifference: 30,
-        innerCircleColor: Colors.yellow,
-        outerCircleColor: Colors.white,
-        center: bottomCenterArcCenter,
-        mainCoordinatesMap: mainCoordinatesMap);
 
     double bottomCenterRightArcRadius = size.height * 0.20;
     Offset bottomCenterRightArcCenter = Offset(
@@ -94,7 +76,30 @@ class FramePainter extends CustomPainter {
     canvas.drawShadow(bottomRightCurvePath, Colors.black, 100.0, false);
     canvas.drawPath(bottomRightCurvePath, bottomRightCurvePaint);
 
+    double bottomCenterArcRadius = size.height * 0.18;
+    Offset bottomCenterArcCenter = Offset(
+        mainCoordinatesMap['bottomLeft'].dx + bottomCenterArcRadius * 1.7,
+        mainCoordinatesMap['bottomLeft'].dy + (bottomCenterArcRadius * 0.25));
+
     drawArcWithOutlineCircle(
+        canvas: canvas,
+        innerCircleRadius: bottomCenterArcRadius * 2 - 30,
+        radiusDifference: 30,
+        innerCircleColor: Colors.red,
+        outerCircleColor: Colors.white,
+        center: mainCoordinatesMap['bottomLeft'],
+        mainCoordinatesMap: mainCoordinatesMap);
+
+    drawArcWithOutlineCircle(
+        canvas: canvas,
+        innerCircleRadius: bottomCenterArcRadius,
+        radiusDifference: 30,
+        innerCircleColor: Colors.yellow,
+        outerCircleColor: Colors.white,
+        center: bottomCenterArcCenter,
+        mainCoordinatesMap: mainCoordinatesMap);
+
+    if(!smallScreen) drawArcWithOutlineCircle(
         canvas: canvas,
         innerCircleRadius: bottomCenterRightArcRadius,
         radiusDifference: bottomCenterRightArcRadiusCenter,
@@ -105,7 +110,7 @@ class FramePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => true;
 
   void drawArc(
       {@required Canvas canvas,
@@ -147,4 +152,5 @@ class FramePainter extends CustomPainter {
         mainCoordinatesMap: mainCoordinatesMap,
         color: innerCircleColor);
   }
+
 }
