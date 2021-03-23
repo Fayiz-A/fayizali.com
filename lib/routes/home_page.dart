@@ -68,7 +68,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 padding: const EdgeInsets.symmetric(vertical: 5.0),
                 child: Image.network('https://images.unsplash.com/photo-1590834367872-3297c46273ac?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=934&q=80', width: MediaQuery.of(context).size.width * 0.2, height: MediaQuery.of(context).size.width * 0.2,)
               ),
-              Text('Something Great is under Construction.\nBe careful while walking else you might fall (-;',),
+              Text('Something great is under construction.\nBe careful while walking else you might fall (-;',),
             ],
           ),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
@@ -97,7 +97,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.article_outlined, size: MediaQuery.of(context).size.width * 0.2,),
-              Text('1. Drag the blue color dart to wherever you want to hit it.\n2. Drag the green color lever and then release it.\n3. The dart will get released.\n\n- The yellowish type colored sectors in the dart board are for General Info Page.\n- The black colored sectors are for Computer Languages Page.'),
+              Text('1. Drag the blue color dart to wherever you want to hit it.\n2. Drag the green color lever and then release it.\n3. The dart will get released.\n\n- The yellow colored sectors in the dart board are for General Info Page.\n- The black colored sectors are for Computer Languages Page.'),
             ],
           ),
           actions: <Widget>[
@@ -147,7 +147,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 MaterialPageRoute(
                     builder: (BuildContext context) => route
                 )
-            );
+            ).then((value) => html.window.location.reload());
           }
         }
       } else {

@@ -171,8 +171,7 @@ class _CustomAnimatedBubbleState extends State<CustomAnimatedBubble>
                         : AnimatedBuilder(
                       animation: _bubbleInformationTextController,
                       child: Container(
-                        width: 200,
-                        height: 200,
+                        width: screenWidth * 0.2,
                         child: Center(
                           child: SelectableText(
                             '${widget.bubbleDisplayInformation.values.first}',//map of one value only
