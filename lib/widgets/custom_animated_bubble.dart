@@ -5,6 +5,7 @@ import 'dart:ui';
 import 'package:fayizali/blocs/bubble_touch_bloc.dart';
 import 'package:fayizali/blocs/integrators/general_info_page/bubble_color_generator.dart';
 import 'package:fayizali/blocs/random_path_bloc.dart';
+import 'package:fayizali/classes/information.dart';
 import 'package:fayizali/constants.dart' as constants;
 import 'package:fayizali/extensions/hex_color.dart';
 import 'package:flutter/material.dart';

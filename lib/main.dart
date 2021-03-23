@@ -7,6 +7,7 @@ import 'package:fayizali/blocs/random_path_bloc.dart';
 import 'package:fayizali/blocs/url_bloc.dart';
 import 'package:fayizali/providers/dart_provider.dart';
 import 'package:fayizali/providers/lever_provider.dart';
+import 'package:fayizali/routes/computer_languages_page.dart';
 import 'package:fayizali/routes/general_info_page.dart';
 import 'package:fayizali/routes/home_page.dart';
 import 'package:flutter/material.dart';
@@ -43,7 +44,7 @@ class MyApp extends StatelessWidget {
                 primarySwatch: Colors.red,
                 splashFactory: InkRipple.splashFactory,
             ),
-        home: GeneralInfoPage(),
+        home: ComputerLanguagesPage(),
       ),
     );
   }
