@@ -1,10 +1,9 @@
 import 'dart:html' as html;
 import 'dart:ui';
 
-import 'package:fayizali/constants.dart' as constants;
-
 import 'package:fayizali/blocs/circle_sector_coordinates_bloc.dart';
 import 'package:fayizali/blocs/math_bloc.dart';
+import 'package:fayizali/constants.dart' as constants;
 import 'package:fayizali/providers/dart_provider.dart';
 import 'package:fayizali/providers/lever_provider.dart';
 import 'package:flutter/material.dart';
@@ -30,7 +29,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       width: window.physicalSize.width,
       height: window.physicalSize.height,
     );
-
   }
 
   MathBloc mathBloc;
@@ -46,8 +44,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     mathBloc = Provider.of<MathBloc>(context, listen: false);
 
-    if(!alertDialogShown) {
-      showWebsiteUnderConstructionAlertDialogBox();
+    homePageAnimationController.forward();
+
+    if (!alertDialogShown) {
+      // showWebsiteUnderConstructionAlertDialogBox();
       alertDialogShown = true;
     }
 
@@ -65,19 +65,25 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(vertical: 5.0),
-                child: Image.network('https://images.unsplash.com/photo-1590834367872-3297c46273ac?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=934&q=80', width: MediaQuery.of(context).size.width * 0.2, height: MediaQuery.of(context).size.width * 0.2,)
+                  padding: const EdgeInsets.symmetric(vertical: 5.0),
+                  child: Image.network(
+                    'https://images.unsplash.com/photo-1590834367872-3297c46273ac?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=934&q=80',
+                    width: MediaQuery.of(context).size.width * 0.2,
+                    height: MediaQuery.of(context).size.width * 0.2,
+                  )),
+              Text(
+                'Something great is under construction.\nBe careful while walking else you might fall (-;',
               ),
-              Text('Something great is under construction.\nBe careful while walking else you might fall (-;',),
             ],
           ),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
+          shape:
+          RoundedRectangleBorder(borderRadius: BorderRadius.circular(10.0)),
           actions: <Widget>[
             TextButton(
               child: Text('OK'),
               onPressed: () {
                 Navigator.of(dialogContext).pop();
-                showInstructionsDialogBoxAndInitializePage();// Dismiss alert dialog
+                showInstructionsDialogBoxAndInitializePage(); // Dismiss alert dialog
               },
             ),
           ],
@@ -96,8 +102,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.article_outlined, size: MediaQuery.of(context).size.width * 0.2,),
-              Text('1. Drag the blue color dart to wherever you want to hit it.\n2. Drag the green color lever and then release it.\n3. The dart will get released.\n\n- The yellow colored sectors in the dart board are for General Info Page.\n- The black colored sectors are for Computer Languages Page.'),
+              Icon(
+                Icons.article_outlined,
+                size: MediaQuery.of(context).size.width * 0.2,
+              ),
+              Text(
+                  '1. Drag the blue color dart to wherever you want to hit it.\n2. Drag the green color lever and then release it.\n3. The dart will get released.\n\n- The yellow colored sectors in the dart board are for General Info Page.\n- The black colored sectors are for Computer Languages Page.'),
             ],
           ),
           actions: <Widget>[
@@ -105,7 +115,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               child: Text('OK'),
               onPressed: () {
                 Navigator.of(dialogContext).pop();
-                dartBoardAnimationController.forward();
+                homePageAnimationController.forward();
               },
             ),
           ],
@@ -116,38 +126,32 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void captureSectorIndexFromMathBlocAndNavigate() async {
     await for (MathBlocState state in mathBloc) {
-      if(state is MathBlocCoordinateInSectorIdentifierState) {
-
-        if(state.sectorContainingCoordinateIndex == -1) {
+      if (state is MathBlocCoordinateInSectorIdentifierState) {
+        if (state.sectorContainingCoordinateIndex == -1) {
           //TODO: implement the logic for resetting everything
 
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Row(
-                  children: <Widget>[
-                    Padding(
-                      padding: const EdgeInsets.only(right: 8.0),
-                      child: Icon(Icons.fast_rewind),
-                    ),
-                    Text('Please hit the dart inside the dartboard'),
-                  ]
-                )
-            )
-          ).closed.then((value) => html.window.location.reload());
-
-
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(
+              content: Row(children: <Widget>[
+                Padding(
+                  padding: const EdgeInsets.only(right: 8.0),
+                  child: Icon(Icons.fast_rewind),
+                ),
+                Text('Please hit the dart inside the dartboard'),
+              ])))
+              .closed
+              .then((value) => html.window.location.reload());
         } else {
-          var route = constants.routesListAccordingToDartBoard[state.sectorContainingCoordinateIndex];
+          var route = constants.routesListAccordingToDartBoard[
+          state.sectorContainingCoordinateIndex];
 
           if (route == null) {
             throw Exception('Route name not found');
           } else {
             //everything is alright
             Navigator.push(context,
-                MaterialPageRoute(
-                    builder: (BuildContext context) => route
-                )
-            ).then((value) => html.window.location.reload());
+                MaterialPageRoute(builder: (BuildContext context) => route))
+                .then((value) => html.window.location.reload());
           }
         }
       } else {
@@ -157,22 +161,21 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void callDartBoardSectorCoordinatesBloc() async {
-
     Size windowSize = Size(
         MediaQuery.of(context).size.width, MediaQuery.of(context).size.height);
 
-    CircleSectorCoordinatesBloc circleSectorCoordinatesBloc = BlocProvider.of<CircleSectorCoordinatesBloc>(context);
-
+    CircleSectorCoordinatesBloc circleSectorCoordinatesBloc =
+    BlocProvider.of<CircleSectorCoordinatesBloc>(context);
 
     circleSectorCoordinatesBloc.add(CircleSectorEndCoordinatesIdentifierEvent(
         radius: (windowSize.height - (windowSize.height * 0.02 * 2)) / 2,
         numberOfSectors: 20,
         center: Offset(windowSize.width / 2, windowSize.height / 2)));
 
-    await for(CircleSectorCoordinatesState state in circleSectorCoordinatesBloc) {
+    await for (CircleSectorCoordinatesState state
+    in circleSectorCoordinatesBloc) {
       if (state is CircleSectorEndCoordinatesIdentifiedState) {
         sectorEndCoordinatesList = state.sectorEndCoordinatesList;
-
       }
     }
   }
@@ -188,25 +191,30 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   AnimationController dartAnimationController;
 
-  AnimationController dartBoardAnimationController;
+  AnimationController homePageAnimationController;
   Animation<double> dartBoardSlideAnimation;
 
   Animation<Offset> leverDartSlideAnimation;
+  Animation<double> dartSlideAnimation;
 
   void prepareAnimations() {
-    dartBoardAnimationController =
-    AnimationController(vsync: this, duration: Duration(milliseconds: 6000));
+    homePageAnimationController = AnimationController(
+        vsync: this, duration: Duration(milliseconds: 6000));
 
     dartBoardSlideAnimation = Tween(begin: -5.0, end: 0.0).animate(
         CurvedAnimation(
-            parent: dartBoardAnimationController,
+            parent: homePageAnimationController,
             curve: Interval(0.25, 0.45, curve: Curves.bounceOut)));
 
     leverDartSlideAnimation =
         Tween<Offset>(begin: Offset(0.0, -5.0), end: Offset(0.0, 0.0)).animate(
             CurvedAnimation(
-                parent: dartBoardAnimationController,
+                parent: homePageAnimationController,
                 curve: Interval(0.5, 0.7, curve: Curves.elasticOut)));
+
+    dartSlideAnimation = Tween<double>(begin: -1.0, end: 1.0).animate(
+        CurvedAnimation(
+            parent: homePageAnimationController, curve: Interval(0.7, 0.8, curve: Curves.elasticOut)));
 
     dartAnimationController =
     AnimationController(vsync: this, duration: Duration(milliseconds: 400))
@@ -258,33 +266,42 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     double scaleValue = dartProvider.scaleValue;
 
     return Positioned(
-        left: offset.dx - ((MediaQuery.of(context).size.width * 0.03) / 2),
-        top: offset.dy - ((MediaQuery.of(context).size.height * 0.03) / 2),
-        child: GestureDetector(
-          onPanUpdate: _onDartDragged,
-          child: ScaleTransition(
-            scale: Tween(begin: scaleValue, end: 1.5)
-                .animate(dartAnimationController),
-            child: Dart(),
-          ),
-        ));
+      left: offset.dx,
+      top: offset.dy - ((MediaQuery.of(context).size.height * 0.03) / 2),
+      child: AnimatedBuilder(
+          animation: dartSlideAnimation,
+          builder: (context, child) {
+            return Transform.translate(
+              offset: Offset(dartSlideAnimation.value * MediaQuery.of(context).size.width * 0.1, 0.0),
+              child: GestureDetector(
+                onPanUpdate: _onDartDragged,
+                child: ScaleTransition(
+                  scale: Tween(begin: scaleValue, end: 1.5)
+                      .animate(dartAnimationController),
+                  child: Dart(),
+                ),
+              ),
+            );
+          }),
+    );
   }
 
-  Widget _renderBoard({@required double screenWidth, @required double screenHeight}) {
+  Widget _renderBoard(
+      {@required double screenWidth, @required double screenHeight}) {
     return Padding(
-      padding: EdgeInsets.all(screenWidth * 0.02), //TODO: Remove this hardcoding
+      padding: EdgeInsets.all(screenWidth * 0.02),
+      //TODO: Remove this hardcoding
       child: AnimatedBuilder(
         animation: dartBoardSlideAnimation,
         builder: (context, child) {
           return Transform.translate(
-            offset: Offset(
-                0,
-                dartBoardSlideAnimation.value *
-                    (screenHeight / 4)),
+            offset:
+            Offset(0, dartBoardSlideAnimation.value * (screenHeight / 4)),
             child: child,
           );
         },
-        child: Transform.rotate(//Just to make the sector ends configurable
+        child: Transform.rotate(
+          //Just to make the sector ends configurable
           angle: 2.02,
           child: Image.asset(
             'dart_board.png',
@@ -294,7 +311,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
     );
   }
 
-  Widget _renderLever({@required double screenWidth, @required double screenHeight}) {
+  Widget _renderLever(
+      {@required double screenWidth, @required double screenHeight}) {
     return SlideTransition(
       position: leverDartSlideAnimation,
       child: Container(
@@ -337,61 +355,60 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-
     dartProvider = Provider.of<DartProvider>(context);
     leverProvider = Provider.of<LeverProvider>(context);
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
+    return LayoutBuilder(builder: (context, constraints) {
+      double screenWidth = constraints.maxWidth;
+      double screenHeight = constraints.maxHeight;
 
-        double screenWidth = constraints.maxWidth;
-        double screenHeight = constraints.maxHeight;
-
-        return Scaffold(
-          body: Stack(children: <Widget>[
-            wallImage,
-            Align(alignment: Alignment.center, child: _renderBoard(screenWidth: screenWidth, screenHeight: screenHeight)),
-            _renderDart(),
-            Positioned(
-              right: screenWidth * 0.04,
-              bottom: screenHeight * 0.05,
-              child: _renderLever(screenWidth: screenWidth, screenHeight: screenHeight),
-            ),
-            // TODO: Remove the widget below as it is only for testing
-            // BlocBuilder<CircleSectorCoordinatesBloc, CircleSectorCoordinatesState>(
-            //     builder: (context, state) {
-            //       if (state is CircleSectorEndCoordinatesIdentifiedState) {
-            //         return Stack(
-            //             alignment: Alignment.center,
-            //             children: state.sectorEndCoordinatesList
-            //                 .map<Widget>((e) => Positioned(
-            //               left: e.dx - 10,
-            //               top: e.dy - 10,
-            //               child: Container(
-            //                 width: 20,
-            //                 height: 20,
-            //                 alignment: Alignment.center,
-            //                 decoration: BoxDecoration(
-            //                     shape: BoxShape.circle, color: Colors.yellow),
-            //                 child: Text(state.sectorEndCoordinatesList
-            //                     .indexOf(e)
-            //                     .toString()),
-            //               ),
-            //             ))
-            //                 .toList());
-            //       } else {
-            //         return Container();
-            //       }
-            //     })
-          ]),
-        );
-      }
-    );
+      return Scaffold(
+        body: Stack(children: <Widget>[
+          wallImage,
+          Align(
+              alignment: Alignment.center,
+              child: _renderBoard(
+                  screenWidth: screenWidth, screenHeight: screenHeight)),
+          _renderDart(),
+          Positioned(
+            right: screenWidth * 0.04,
+            bottom: screenHeight * 0.05,
+            child: _renderLever(
+                screenWidth: screenWidth, screenHeight: screenHeight),
+          ),
+          // TODO: Remove the widget below as it is only for testing
+          // BlocBuilder<CircleSectorCoordinatesBloc, CircleSectorCoordinatesState>(
+          //     builder: (context, state) {
+          //       if (state is CircleSectorEndCoordinatesIdentifiedState) {
+          //         return Stack(
+          //             alignment: Alignment.center,
+          //             children: state.sectorEndCoordinatesList
+          //                 .map<Widget>((e) => Positioned(
+          //               left: e.dx - 10,
+          //               top: e.dy - 10,
+          //               child: Container(
+          //                 width: 20,
+          //                 height: 20,
+          //                 alignment: Alignment.center,
+          //                 decoration: BoxDecoration(
+          //                     shape: BoxShape.circle, color: Colors.yellow),
+          //                 child: Text(state.sectorEndCoordinatesList
+          //                     .indexOf(e)
+          //                     .toString()),
+          //               ),
+          //             ))
+          //                 .toList());
+          //       } else {
+          //         return Container();
+          //       }
+          //     })
+        ]),
+      );
+    });
   }
 }
 
 class Dart extends StatefulWidget {
-
   @override
   _DartState createState() => _DartState();
 }

@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 
 class DartProvider with ChangeNotifier {
 
-  Offset _dragPosition = Offset(WidgetsBinding.instance.window.physicalSize.width * 0.1, WidgetsBinding.instance.window.physicalSize.height * 0.1);
+  Offset _dragPosition = Offset(0.0, WidgetsBinding.instance.window.physicalSize.height * 0.1);
 
   Offset _dartLocalPosition = Offset(0.0, 0.0);
 

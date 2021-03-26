@@ -16,7 +16,7 @@ import 'package:provider/provider.dart';
 import 'package:url_strategy/url_strategy.dart';
 
 void main() {
-  setPathUrlStrategy();
+  // setPathUrlStrategy();
 
   runApp(MyApp());
 }
