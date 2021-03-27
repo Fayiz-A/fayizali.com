@@ -199,7 +199,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void prepareAnimations() {
     homePageAnimationController = AnimationController(
-        vsync: this, duration: Duration(milliseconds: 6000));
+        vsync: this, duration: Duration(milliseconds: 6000))
+      ..addListener(() {
+         if(homePageAnimationController.value == 1.0) {
+           // dartAnimationController.forward();
+         }
+        });
 
     dartBoardSlideAnimation = Tween(begin: -5.0, end: 0.0).animate(
         CurvedAnimation(
@@ -214,12 +219,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
     dartSlideAnimation = Tween<double>(begin: -1.0, end: 1.0).animate(
         CurvedAnimation(
-            parent: homePageAnimationController, curve: Interval(0.7, 0.8, curve: Curves.elasticOut)));
+            parent: homePageAnimationController,
+            curve: Interval(0.7, 0.8, curve: Curves.elasticOut)));
 
     dartAnimationController =
     AnimationController(vsync: this, duration: Duration(milliseconds: 400))
       ..addStatusListener((status) {
-        print('Status is: $status');
         if (status == AnimationStatus.completed) {
           mathBloc.add(CoordinateInSectorIdentifierBlocEvent(
               sectorEndCoordinatesList: sectorEndCoordinatesList,
@@ -232,7 +237,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   void _onDartDragged(DragUpdateDetails details) {
-    dartProvider.dragPosition = details.globalPosition;
+    dartProvider.dragPosition = Offset(
+        details.globalPosition.dx - dartSlideAnimation.value *
+        MediaQuery.of(context).size.width *
+        0.1,
+        details.globalPosition.dy
+    );
   }
 
   double leverContainerHeight;
@@ -261,30 +271,51 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 
   Widget _renderDart() {
-    DartProvider dartProvider = Provider.of<DartProvider>(context);
-    Offset offset = dartProvider.dragPosition;
-    double scaleValue = dartProvider.scaleValue;
+    // DartProvider dartProvider = Provider.of<DartProvider>(context);
+    // Offset offset = dartProvider.dragPosition;
+    // double scaleValue = dartProvider.scaleValue;
 
-    return Positioned(
-      left: offset.dx,
-      top: offset.dy - ((MediaQuery.of(context).size.height * 0.03) / 2),
-      child: AnimatedBuilder(
-          animation: dartSlideAnimation,
-          builder: (context, child) {
-            return Transform.translate(
-              offset: Offset(dartSlideAnimation.value * MediaQuery.of(context).size.width * 0.1, 0.0),
-              child: GestureDetector(
-                onPanUpdate: _onDartDragged,
-                child: ScaleTransition(
-                  scale: Tween(begin: scaleValue, end: 1.5)
-                      .animate(dartAnimationController),
-                  child: Dart(),
+    return AnimatedBuilder(
+        animation: dartSlideAnimation,
+        child: Consumer<DartProvider>(
+          child: Dart(),
+          builder: (context, provider, child) {
+            Offset offset = provider.dragPosition;
+            double scaleValue = provider.scaleValue;
+
+            return Stack(
+              children: [
+                Positioned(
+                  left: offset.dx,
+                  top: offset.dy - ((MediaQuery.of(context).size.height * 0.03) / 2),
+                  child: GestureDetector(
+                    onPanUpdate: _onDartDragged,
+                    child: ScaleTransition(
+                      scale: Tween(begin: scaleValue, end: 1.5)
+                          .animate(dartAnimationController),
+                      child: child,
+                    ),
+                  ),
                 ),
-              ),
+              ],
             );
-          }),
-    );
+          },
+        ),
+        builder: (context, child) {
+          return Transform.translate(
+            offset: Offset(
+                dartSlideAnimation.value *
+                    MediaQuery.of(context).size.width *
+                    0.1,
+                0.0),
+            child: child,
+          );
+        });
   }
+
+  // AnimatedBuilder _renderAnimatedDart({@required widget}) {
+  //   return
+  // }
 
   Widget _renderBoard(
       {@required double screenWidth, @required double screenHeight}) {
@@ -333,8 +364,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
                 dartAnimationController.forward();
               },
-              child: CircleAvatar(
-                backgroundColor: Colors.white,
+              child: Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  boxShadow: <BoxShadow>[
+                    BoxShadow(
+                      color: Colors.blueGrey,
+                      spreadRadius: 2.0,
+
+                    )
+                  ],
+                ),
               )),
           builder: (context, provider, child) {
             double leverPosition = provider.dragPosition;
@@ -408,14 +451,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   }
 }
 
-class Dart extends StatefulWidget {
-  @override
-  _DartState createState() => _DartState();
-}
-
-class _DartState extends State<Dart> {
+class Dart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+
     double screenLongestSide = MediaQuery.of(context).size.longestSide;
     return Image.asset(
       'dart.png',
