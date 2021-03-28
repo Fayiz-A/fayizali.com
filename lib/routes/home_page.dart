@@ -190,28 +190,39 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   double left = 0.0;
 
   AnimationController dartAnimationController;
-
+  AnimationController leverButtonSlideAnimationController;
   AnimationController homePageAnimationController;
   Animation<double> dartBoardSlideAnimation;
 
-  Animation<Offset> leverDartSlideAnimation;
+  Animation<Offset> leverSlideAnimation;
   Animation<double> dartSlideAnimation;
+  Animation<double> leverButtonSlideAnimation;
 
   void prepareAnimations() {
-    homePageAnimationController = AnimationController(
-        vsync: this, duration: Duration(milliseconds: 6000))
+    bool shouldAnimate = true;
+
+    homePageAnimationController =
+    AnimationController(vsync: this, duration: Duration(milliseconds: 6000))
       ..addListener(() {
-         if(homePageAnimationController.value == 1.0) {
-           // dartAnimationController.forward();
-         }
-        });
+        if (leverButtonSlideAnimation.value > 0 && shouldAnimate) {
+          leverButtonSlideAnimationController.forward().then((value) {
+            leverButtonSlideAnimationController.reverse();
+            shouldAnimate = false;
+          });
+        }
+      });
+
+    leverButtonSlideAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+        CurvedAnimation(
+            parent: homePageAnimationController,
+            curve: Interval(0.8, 0.9, curve: Curves.linear)));
 
     dartBoardSlideAnimation = Tween(begin: -5.0, end: 0.0).animate(
         CurvedAnimation(
             parent: homePageAnimationController,
             curve: Interval(0.25, 0.45, curve: Curves.bounceOut)));
 
-    leverDartSlideAnimation =
+    leverSlideAnimation =
         Tween<Offset>(begin: Offset(0.0, -5.0), end: Offset(0.0, 0.0)).animate(
             CurvedAnimation(
                 parent: homePageAnimationController,
@@ -221,6 +232,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         CurvedAnimation(
             parent: homePageAnimationController,
             curve: Interval(0.7, 0.8, curve: Curves.elasticOut)));
+
+    leverButtonSlideAnimationController = AnimationController(
+      duration: Duration(milliseconds: 500),
+      vsync: this,
+    )..addListener(() {
+      dartProvider.scaleValue = leverButtonSlideAnimationController.value;
+    });
 
     dartAnimationController =
     AnimationController(vsync: this, duration: Duration(milliseconds: 400))
@@ -238,11 +256,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void _onDartDragged(DragUpdateDetails details) {
     dartProvider.dragPosition = Offset(
-        details.globalPosition.dx - dartSlideAnimation.value *
-        MediaQuery.of(context).size.width *
-        0.1,
-        details.globalPosition.dy
-    );
+        details.globalPosition.dx -
+            dartSlideAnimation.value * MediaQuery.of(context).size.width * 0.1,
+        details.globalPosition.dy);
   }
 
   double leverContainerHeight;
@@ -287,7 +303,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               children: [
                 Positioned(
                   left: offset.dx,
-                  top: offset.dy - ((MediaQuery.of(context).size.height * 0.03) / 2),
+                  top: offset.dy -
+                      ((MediaQuery.of(context).size.height * 0.03) / 2),
                   child: GestureDetector(
                     onPanUpdate: _onDartDragged,
                     child: ScaleTransition(
@@ -312,10 +329,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           );
         });
   }
-
-  // AnimatedBuilder _renderAnimatedDart({@required widget}) {
-  //   return
-  // }
 
   Widget _renderBoard(
       {@required double screenWidth, @required double screenHeight}) {
@@ -345,7 +358,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Widget _renderLever(
       {@required double screenWidth, @required double screenHeight}) {
     return SlideTransition(
-      position: leverDartSlideAnimation,
+      position: leverSlideAnimation,
       child: Container(
         key: leverKey,
         width: 50.0,
@@ -374,7 +387,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     BoxShadow(
                       color: Colors.blueGrey,
                       spreadRadius: 2.0,
-
                     )
                   ],
                 ),
@@ -383,13 +395,23 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             double leverPosition = provider.dragPosition;
             bool leverDragged = provider.leverDragged;
 
-            return AnimatedPadding(
-              duration: leverDragged == true
-                  ? dartAnimationController.duration
-                  : Duration.zero,
-              padding: EdgeInsets.fromLTRB(8.0, 8.0, 8.0, leverPosition),
-              child: child,
-            );
+            return AnimatedBuilder(
+                animation: leverButtonSlideAnimationController,
+                builder: (context, _) {
+                  return AnimatedPadding(
+                    duration: leverDragged == true
+                        ? dartAnimationController.duration
+                        : Duration.zero,
+                    padding: EdgeInsets.fromLTRB(8.0, 8.0, 8.0, leverPosition),
+                    child: Transform.translate(
+                      offset: Offset(
+                          0,
+                          -(leverButtonSlideAnimationController.value *
+                              (((screenHeight / 2.5) - 16) - 40))),
+                      child: child,
+                    ),
+                  );
+                });
           },
         ),
       ),
@@ -454,7 +476,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 class Dart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-
     double screenLongestSide = MediaQuery.of(context).size.longestSide;
     return Image.asset(
       'dart.png',
