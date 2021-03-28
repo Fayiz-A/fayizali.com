@@ -3,9 +3,11 @@ import 'dart:ui';
 
 import 'package:fayizali/blocs/circle_sector_coordinates_bloc.dart';
 import 'package:fayizali/blocs/math_bloc.dart';
+import 'package:fayizali/blocs/rive_parchment_bloc.dart';
 import 'package:fayizali/constants.dart' as constants;
 import 'package:fayizali/providers/dart_provider.dart';
 import 'package:fayizali/providers/lever_provider.dart';
+import 'package:fayizali/widgets/rive/rive_parchment_animation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -68,8 +70,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   padding: const EdgeInsets.symmetric(vertical: 5.0),
                   child: Image.network(
                     'https://images.unsplash.com/photo-1590834367872-3297c46273ac?ixlib=rb-1.2.1&ixid=MXwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHw%3D&auto=format&fit=crop&w=934&q=80',
-                    width: MediaQuery.of(context).size.width * 0.2,
-                    height: MediaQuery.of(context).size.width * 0.2,
+                    width: MediaQuery
+                        .of(context)
+                        .size
+                        .width * 0.2,
+                    height: MediaQuery
+                        .of(context)
+                        .size
+                        .width * 0.2,
                   )),
               Text(
                 'Something great is under construction.\nBe careful while walking else you might fall (-;',
@@ -104,7 +112,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             children: [
               Icon(
                 Icons.article_outlined,
-                size: MediaQuery.of(context).size.width * 0.2,
+                size: MediaQuery
+                    .of(context)
+                    .size
+                    .width * 0.2,
               ),
               Text(
                   '1. Drag the blue color dart to wherever you want to hit it.\n2. Drag the green color lever and then release it.\n3. The dart will get released.\n\n- The yellow colored sectors in the dart board are for General Info Page.\n- The black colored sectors are for Computer Languages Page.'),
@@ -130,7 +141,8 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         if (state.sectorContainingCoordinateIndex == -1) {
           //TODO: implement the logic for resetting everything
 
-          ScaffoldMessenger.of(context)
+          ScaffoldMessenger
+              .of(context)
               .showSnackBar(SnackBar(
               content: Row(children: <Widget>[
                 Padding(
@@ -162,7 +174,13 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   void callDartBoardSectorCoordinatesBloc() async {
     Size windowSize = Size(
-        MediaQuery.of(context).size.width, MediaQuery.of(context).size.height);
+        MediaQuery
+            .of(context)
+            .size
+            .width, MediaQuery
+        .of(context)
+        .size
+        .height);
 
     CircleSectorCoordinatesBloc circleSectorCoordinatesBloc =
     BlocProvider.of<CircleSectorCoordinatesBloc>(context);
@@ -197,9 +215,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   Animation<Offset> leverSlideAnimation;
   Animation<double> dartSlideAnimation;
   Animation<double> leverButtonSlideAnimation;
+  Animation<double> parchmentSlideAnimation;
 
   void prepareAnimations() {
     bool shouldAnimate = true;
+    bool shouldRoll = true;
 
     homePageAnimationController =
     AnimationController(vsync: this, duration: Duration(milliseconds: 6000))
@@ -209,6 +229,12 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             leverButtonSlideAnimationController.reverse();
             shouldAnimate = false;
           });
+        }
+        if (leverButtonSlideAnimation.value == 1.0 && shouldRoll) {
+          RiveParchmentBloc riveParchmentBloc = BlocProvider.of<
+              RiveParchmentBloc>(context);
+          riveParchmentBloc.add(RiveParchmentUnfoldEvent());
+          shouldRoll = false;
         }
       });
 
@@ -233,12 +259,20 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             parent: homePageAnimationController,
             curve: Interval(0.7, 0.8, curve: Curves.elasticOut)));
 
+    parchmentSlideAnimation = Tween<double>(begin: -1.0, end: 1.0).animate(
+        CurvedAnimation(
+            parent: homePageAnimationController,
+            curve: Interval(0.7, 0.8, curve: Curves.linear)
+        )
+    );
+
     leverButtonSlideAnimationController = AnimationController(
       duration: Duration(milliseconds: 500),
       vsync: this,
-    )..addListener(() {
-      dartProvider.scaleValue = leverButtonSlideAnimationController.value;
-    });
+    )
+      ..addListener(() {
+        dartProvider.scaleValue = leverButtonSlideAnimationController.value;
+      });
 
     dartAnimationController =
     AnimationController(vsync: this, duration: Duration(milliseconds: 400))
@@ -247,8 +281,14 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           mathBloc.add(CoordinateInSectorIdentifierBlocEvent(
               sectorEndCoordinatesList: sectorEndCoordinatesList,
               coordinate: dartProvider.dragPosition,
-              center: Offset(MediaQuery.of(context).size.width / 2,
-                  MediaQuery.of(context).size.height / 2)));
+              center: Offset(MediaQuery
+                  .of(context)
+                  .size
+                  .width / 2,
+                  MediaQuery
+                      .of(context)
+                      .size
+                      .height / 2)));
           captureSectorIndexFromMathBlocAndNavigate();
         }
       });
@@ -257,7 +297,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   void _onDartDragged(DragUpdateDetails details) {
     dartProvider.dragPosition = Offset(
         details.globalPosition.dx -
-            dartSlideAnimation.value * MediaQuery.of(context).size.width * 0.1,
+            dartSlideAnimation.value * MediaQuery
+                .of(context)
+                .size
+                .width * 0.1,
         details.globalPosition.dy);
   }
 
@@ -304,7 +347,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 Positioned(
                   left: offset.dx,
                   top: offset.dy -
-                      ((MediaQuery.of(context).size.height * 0.03) / 2),
+                      ((MediaQuery
+                          .of(context)
+                          .size
+                          .height * 0.03) / 2),
                   child: GestureDetector(
                     onPanUpdate: _onDartDragged,
                     child: ScaleTransition(
@@ -322,7 +368,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           return Transform.translate(
             offset: Offset(
                 dartSlideAnimation.value *
-                    MediaQuery.of(context).size.width *
+                    MediaQuery
+                        .of(context)
+                        .size
+                        .width *
                     0.1,
                 0.0),
             child: child,
@@ -441,6 +490,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             child: _renderLever(
                 screenWidth: screenWidth, screenHeight: screenHeight),
           ),
+          Positioned(
+              right: screenWidth * 0.1,
+              child: _renderRiveParchmentAnimation(screenWidth, screenHeight)
+          )
           // TODO: Remove the widget below as it is only for testing
           // BlocBuilder<CircleSectorCoordinatesBloc, CircleSectorCoordinatesState>(
           //     builder: (context, state) {
@@ -471,12 +524,31 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       );
     });
   }
+
+  Widget _renderRiveParchmentAnimation(double screenWidth,
+      double screenHeight) {
+    return AnimatedBuilder(
+      animation: parchmentSlideAnimation,
+      builder: (BuildContext context, Widget child) {
+        return Transform.translate(
+          offset: Offset(0.0, parchmentSlideAnimation.value * screenHeight * 0.15),
+          child: RiveParchmentAnimation(
+              width: screenWidth * 0.2,
+              height: screenHeight * 0.4
+          ),
+        );
+      },
+    );
+  }
 }
 
 class Dart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    double screenLongestSide = MediaQuery.of(context).size.longestSide;
+    double screenLongestSide = MediaQuery
+        .of(context)
+        .size
+        .longestSide;
     return Image.asset(
       'dart.png',
       width: screenLongestSide * 0.03,

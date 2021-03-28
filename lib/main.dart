@@ -4,6 +4,7 @@ import 'package:fayizali/blocs/color_bloc.dart';
 import 'package:fayizali/blocs/integrators/general_info_page/bubble_color_generator.dart';
 import 'package:fayizali/blocs/math_bloc.dart';
 import 'package:fayizali/blocs/random_path_bloc.dart';
+import 'package:fayizali/blocs/rive_parchment_bloc.dart';
 import 'package:fayizali/blocs/url_bloc.dart';
 import 'package:fayizali/providers/dart_provider.dart';
 import 'package:fayizali/providers/lever_provider.dart';
@@ -35,6 +36,7 @@ class MyApp extends StatelessWidget {
         BlocProvider(create: (_) => TouchBloc()),
         BlocProvider(create: (_) => ColorBloc()),
         BlocProvider(create: (_) => BubbleColorGeneratorBloc()),
+        BlocProvider(create: (_) => RiveParchmentBloc()),
       ],
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
