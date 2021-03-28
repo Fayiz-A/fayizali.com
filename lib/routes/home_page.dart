@@ -244,7 +244,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             parent: homePageAnimationController,
             curve: Interval(0.7, 0.8, curve: Curves.elasticOut)));
 
-    parchmentSlideAnimation = Tween<double>(begin: -1.0, end: 1.0).animate(
+    parchmentSlideAnimation = Tween<double>(begin: -3.0, end: 1.0).animate(
         CurvedAnimation(
             parent: homePageAnimationController,
             curve: Interval(0.7, 0.8, curve: Curves.linear)));
@@ -450,6 +450,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
               alignment: Alignment.center,
               child: _renderBoard(
                   screenWidth: screenWidth, screenHeight: screenHeight)),
+          Positioned(
+              right: screenHeight * 0.02,
+              child: _renderRiveParchmentAnimation(screenWidth, screenHeight)),
           _renderDart(),
           Positioned(
             right: screenWidth * 0.04,
@@ -457,9 +460,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             child: _renderLever(
                 screenWidth: screenWidth, screenHeight: screenHeight),
           ),
-          Positioned(
-              right: screenWidth * 0.1,
-              child: _renderRiveParchmentAnimation(screenWidth, screenHeight))
           // TODO: Remove the widget below as it is only for testing
           // BlocBuilder<CircleSectorCoordinatesBloc, CircleSectorCoordinatesState>(
           //     builder: (context, state) {
@@ -508,7 +508,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       builder: (BuildContext context, Widget child) {
         return Transform.translate(
             offset: Offset(
-                0.0, parchmentSlideAnimation.value * screenHeight * 0.15),
+                0.0, parchmentSlideAnimation.value * screenHeight * 0.04),
             child: child);
       },
     );
