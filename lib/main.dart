@@ -6,18 +6,23 @@ import 'package:fayizali/blocs/math_bloc.dart';
 import 'package:fayizali/blocs/random_path_bloc.dart';
 import 'package:fayizali/blocs/rive_parchment_bloc.dart';
 import 'package:fayizali/blocs/url_bloc.dart';
+import 'package:fayizali/controllers/firebase_controllers/firebase_controller.dart';
+import 'package:fayizali/controllers/firebase_controllers/firestore_controller.dart';
 import 'package:fayizali/providers/dart_provider.dart';
 import 'package:fayizali/providers/lever_provider.dart';
+import 'package:fayizali/routes/blogs/blogs_page.dart';
 import 'package:fayizali/routes/computer_languages_page.dart';
 import 'package:fayizali/routes/general_info_page.dart';
 import 'package:fayizali/routes/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:url_strategy/url_strategy.dart';
 
 void main() {
-  // setPathUrlStrategy();
+  setPathUrlStrategy();
+  WidgetsFlutterBinding.ensureInitialized();
 
   runApp(MyApp());
 }
@@ -25,6 +30,10 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+
+    Get.put(FirebaseController());
+    Get.put(FirestoreController());
+
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => LeverProvider()),
@@ -45,8 +54,11 @@ class MyApp extends StatelessWidget {
             ThemeData(
                 primarySwatch: Colors.red,
                 splashFactory: InkRipple.splashFactory,
+                textTheme: ThemeData().textTheme.copyWith(
+
+                )
             ),
-        home: HomePage(),
+        home: BlogsPage(),
       ),
     );
   }
