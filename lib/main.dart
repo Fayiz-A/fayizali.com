@@ -21,6 +21,8 @@ import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:url_strategy/url_strategy.dart';
 
+import 'models/blog.dart';
+
 void main() {
   setPathUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
@@ -72,16 +74,16 @@ class MyApp extends StatelessWidget {
           Uri uri = Uri.parse(settings.name);
           if (uri.pathSegments.length == 2 &&
               uri.pathSegments.first == 'blogs') {
-            String title = uri.pathSegments[1];
+            String docId = uri.pathSegments[1];
 
-            String article;
+            Blog article;
 
             Map args = settings.arguments as Map;
 
             if(args != null) {
               article = args['article'];
             }
-            return MaterialPageRoute(builder: (context) => ArticlePage(title: title, article: article,), settings: RouteSettings(name: 'blogs/$title'));
+            return MaterialPageRoute(builder: (context) => ArticlePage(docId: docId, blog: article,), settings: RouteSettings(name: 'blogs/$docId'));
           }
 
           return MaterialPageRoute(builder: (context) => HomePage());//Fixme: replace this with 404 page.

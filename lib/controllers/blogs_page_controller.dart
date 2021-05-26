@@ -11,7 +11,7 @@ class BlogsPageController extends GetxController {
 
   @override
   Future<void> onInit() async {
-    firestoreController = Get.find<FirestoreController>();
+    firestoreController = Get.put(FirestoreController(), tag: 'blog');
     firestoreController.setCollectionReference('blogs');
     await fetchArticles();
 
@@ -25,7 +25,9 @@ class BlogsPageController extends GetxController {
 
       blogsSnapshot.docs.forEach((doc) {
          if(doc != null) {
-           Blog blog = Blog.fromJson(doc.data());
+           Map<String, dynamic> data = doc.data();
+           data['docId'] = doc.id;
+           Blog blog = Blog.fromJson(data);
 
            _blogList.add(blog);
          }

@@ -51,12 +51,15 @@ class BlogCard extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.all(Radius.circular(50.0)),
       child: InkWell(
-        onTap: () => Navigator.pushNamed(context, 'blogs/sometitle', arguments: {'article': 'some article'}),
+        onTap: () => Navigator.pushNamed(context, 'blogs/${blog.docId}', arguments: {'article': blog}),
         child: Card(
           elevation: 20.0,
           child: Column(
             children: [
-              Image.network(blog.headerImageUrl),
+              Hero(
+                  tag: 'articleHeaderImage',
+                  child: Image.network(blog.headerImageUrl)
+              ),
               Align(
                 alignment: Alignment.topLeft,
                   child: Text(blog.title)
