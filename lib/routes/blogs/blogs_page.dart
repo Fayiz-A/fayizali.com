@@ -50,30 +50,33 @@ class BlogCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.all(Radius.circular(50.0)),
-      child: Card(
-        elevation: 20.0,
-        child: Column(
-          children: [
-            Image.network(blog.headerImageUrl),
-            Align(
-              alignment: Alignment.topLeft,
-                child: Text(blog.title)
-            ),
-            Spacer(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Align(
-                  alignment: Alignment.bottomLeft,
-                  child: Text('${blog.time.day}/${blog.time.month}/${blog.time.year} ${blog.time.hour}:${blog.time.minute.toString().length == 1 ? '0':''}${blog.time.minute}'),
-                ),
-                Align(
-                  alignment: Alignment.bottomRight,
-                  child: Text(blog.author),
-                ),
-              ],
-            )
-          ],
+      child: InkWell(
+        onTap: () => Navigator.pushNamed(context, 'blogs/sometitle', arguments: {'article': 'some article'}),
+        child: Card(
+          elevation: 20.0,
+          child: Column(
+            children: [
+              Image.network(blog.headerImageUrl),
+              Align(
+                alignment: Alignment.topLeft,
+                  child: Text(blog.title)
+              ),
+              Spacer(),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Align(
+                    alignment: Alignment.bottomLeft,
+                    child: Text('${blog.time.day}/${blog.time.month}/${blog.time.year} ${blog.time.hour}:${blog.time.minute.toString().length == 1 ? '0':''}${blog.time.minute}'),
+                  ),
+                  Align(
+                    alignment: Alignment.bottomRight,
+                    child: Text(blog.author),
+                  ),
+                ],
+              )
+            ],
+          ),
         ),
       ),
     );

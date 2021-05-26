@@ -152,9 +152,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
             throw Exception('Route name not found');
           } else {
             //everything is alright
-            Navigator.push(context,
-                MaterialPageRoute(builder: (BuildContext context) => route))
-                .then((value) => html.window.location.reload());
+            Navigator.pushNamed(context, route);
           }
         }
       } else {
