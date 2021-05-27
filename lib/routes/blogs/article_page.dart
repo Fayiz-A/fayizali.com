@@ -17,7 +17,7 @@ class ArticlePage extends StatelessWidget {
         tag: 'article$docId');
 
     return Obx(
-          () {
+      () {
         if (articlePageController.observableBlog.value != null) {
           Blog _blog = articlePageController.observableBlog.value;
 
@@ -41,24 +41,51 @@ class Content extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Scrollbar(
-        isAlwaysShown: true,
-        child: ListView(
-          padding: EdgeInsets.symmetric(horizontal: MediaQuery.of(context).size.width * 0.2, ),
-          children: [
-            Header(
-              blog: blog,
+    final ArticlePageController articlePageController =
+        Get.find<ArticlePageController>(tag: 'article${blog.docId}');
+
+    ScrollController scrollController = ScrollController();
+    scrollController.addListener(() {
+      articlePageController.setScrollPosition(scrollController.position);
+    });
+    return GetBuilder<ArticlePageController>(
+      init: ArticlePageController(docId: blog.docId),
+      tag: 'article${blog.docId}',
+      id: 'article${blog.docId}',
+      builder: (controller) {
+        double scrollPercent = controller.scrollPercent.value;
+        return Container(
+          width: double.maxFinite,
+          height: double.maxFinite,
+          decoration: BoxDecoration(
+              gradient: RadialGradient(
+                  colors: [Color(0xffef629f), Color(0xffeecda3)],
+                  center: Alignment.bottomRight,
+                  radius: 2,
+                  stops: [0.0, scrollPercent])),
+          child: Scrollbar(
+            controller: scrollController,
+            isAlwaysShown: true,
+            child: ListView(
+              controller: scrollController,
+              padding: EdgeInsets.symmetric(
+                horizontal: MediaQuery.of(context).size.width * 0.2,
+              ),
+              children: [
+                Header(
+                  blog: blog,
+                ),
+                HeaderImage(
+                  blog: blog,
+                ),
+                Body(
+                  blog: blog,
+                ),
+              ],
             ),
-            HeaderImage(
-              blog: blog,
-            ),
-            Body(
-              blog: blog,
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }
@@ -72,7 +99,10 @@ class Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Text(blog.title, style: Theme.of(context).textTheme.headline2,),
+        Text(
+          blog.title,
+          style: Theme.of(context).textTheme.headline2,
+        ),
         Align(
           alignment: Alignment.centerLeft,
           child: AuthorAndTime(
@@ -106,9 +136,8 @@ class AuthorAndTime extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: EdgeInsets.only(left: 5.0),
-                  child: Text(blog.author)
-              ),
+                  padding: EdgeInsets.only(left: 5.0),
+                  child: Text(blog.author)),
               Text(
                   '${blog.time.day}/${blog.time.month}/${blog.time.year} ${blog.time.hour}:${blog.time.minute.toString().length == 1 ? '0' : ''}${blog.time.minute}')
             ],
@@ -126,8 +155,29 @@ class HeaderImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Hero(
-        tag: 'articleHeaderImage', child: Image.network(blog.headerImageUrl));
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Hero(
+          tag: 'articleHeaderImage',
+          child: Image.network(
+            blog.headerImageUrl,
+            height: MediaQuery.of(context).size.height * 0.6,
+            frameBuilder: (context, child, loadingProgress, _) {
+              if (loadingProgress == null) {
+                return Container(
+                  height: MediaQuery.of(context).size.height * 0.6,
+                  child: Center(
+                    child: LinearProgressIndicator(),
+                  ),
+                );
+
+              }
+              return child;
+
+            },
+            fit: BoxFit.fitWidth,
+          )),
+    );
   }
 }
 
@@ -138,13 +188,11 @@ class Body extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint(blog.article);
-
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 20.0),
       child: MarkdownBody(
         selectable: true,
-        data: blog.article.replaceAll('  ', '\n'),
+        data: blog.article,
       ),
     );
   }

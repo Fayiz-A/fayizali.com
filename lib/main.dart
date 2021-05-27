@@ -53,7 +53,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Fayiz Ali',
-        initialRoute: '/blogs',
+        initialRoute: '/blogs/JkYIVnyOgZzOY3krfTKV',
         onGenerateRoute: (settings) {
           String name = settings.name;
 
