@@ -53,7 +53,7 @@ class MyApp extends StatelessWidget {
       child: MaterialApp(
         debugShowCheckedModeBanner: false,
         title: 'Fayiz Ali',
-        initialRoute: '/blogs/JkYIVnyOgZzOY3krfTKV',
+        initialRoute: '/blogs',
         onGenerateRoute: (settings) {
           String name = settings.name;
 
@@ -83,7 +83,22 @@ class MyApp extends StatelessWidget {
             if(args != null) {
               article = args['article'];
             }
-            return MaterialPageRoute(builder: (context) => ArticlePage(docId: docId, blog: article,), settings: RouteSettings(name: 'blogs/$docId'));
+            return PageRouteBuilder(
+                pageBuilder: (context, anim, secondaryAnim) => ArticlePage(docId: docId, blog: article,), settings: RouteSettings(name: 'blogs/$docId'),
+                transitionsBuilder: (context, anim, secondaryAnim, child) {
+
+                  Animation animation = Tween<double>(
+                    begin: 0.5,
+                    end: 1.0,
+                  ).animate(anim);
+
+                    return ScaleTransition(
+                      alignment: Alignment(-0.9, -0.9),
+                        scale: animation,
+                        child: child
+                    );
+                }
+            );
           }
 
           return MaterialPageRoute(builder: (context) => HomePage());//Fixme: replace this with 404 page.
